@@ -1,0 +1,1645 @@
+# Rust Photo Error Summary: Contains multiple unresolved imports and implementation issues
+
+    Checking rust_photo v0.1.0 (/home/matt/affinity_photo_rs)
+error[E0432]: unresolved import `settings::SettingsManager`
+  --> src/ui/mod.rs:37:46
+   |
+37 | pub use settings::{Settings, SettingsDialog, SettingsManager};
+   |                                              ^^^^^^^^^^^^^^^ no `SettingsManager` in `ui::settings`
+   |
+   = help: consider importing this struct through its public re-export instead:
+           crate::core::SettingsManager
+
+error[E0432]: unresolved import `crate::core::layer::Selection`
+ --> src/core/canvas.rs:9:47
+  |
+9 | use crate::core::layer::{Layer, LayerManager, Selection};
+  |                                               ^^^^^^^^^ no `Selection` in `core::layer`
+  |
+  = help: consider importing one of these items instead:
+          crate::Tool::Selection
+          crate::core::Selection
+          crate::tools::ToolType::Selection
+          gtk4::PrintPages::Selection
+
+error[E0432]: unresolved import `crate::core::layers`
+ --> src/core/document.rs:6:18
+  |
+6 | use crate::core::layers::{Layer, LayerManager};
+  |                  ^^^^^^ could not find `layers` in `core`
+
+error[E0432]: unresolved imports `brush::BrushType`, `brush::BrushSettings`
+  --> src/tools/mod.rs:13:28
+   |
+13 | pub use brush::{BrushTool, BrushType, BrushSettings};
+   |                            ^^^^^^^^^  ^^^^^^^^^^^^^ no `BrushSettings` in `tools::brush`
+   |                            |
+   |                            no `BrushType` in `tools::brush`
+   |                            help: a similar name exists in the module: `BrushTool`
+   |
+   = help: consider importing this struct instead:
+           crate::core::canvas::BrushSettings
+
+error[E0432]: unresolved import `clone::CloneSettings`
+  --> src/tools/mod.rs:14:28
+   |
+14 | pub use clone::{CloneTool, CloneSettings};
+   |                            ^^^^^^^^^^^^^ no `CloneSettings` in `tools::clone`
+
+error[E0432]: unresolved import `transform`
+   --> src/tools/mod.rs:459:9
+    |
+459 | pub use transform::TransformTool;
+    |         ^^^^^^^^^ use of undeclared crate or module `transform`
+
+error[E0432]: unresolved import `paint`
+   --> src/tools/mod.rs:460:9
+    |
+460 | pub use paint::PaintTool;
+    |         ^^^^^ use of undeclared crate or module `paint`
+
+error[E0432]: unresolved import `vector`
+   --> src/tools/mod.rs:461:9
+    |
+461 | pub use vector::VectorTool;
+    |         ^^^^^^ help: a similar path exists: `crate::vector`
+    |
+    = note: `use` statements changed in Rust 2018; read more at <https://doc.rust-lang.org/edition-guide/rust-2018/module-system/path-clarity.html>
+
+error[E0432]: unresolved import `crate::core::layer::LayerType`
+  --> src/ui/main_window.rs:18:33
+   |
+18 | use crate::core::layer::{Layer, LayerType};
+   |                                 ^^^^^^^^^ no `LayerType` in `core::layer`
+
+error[E0432]: unresolved import `crate::core::layer::LayerType`
+ --> src/ui/canvas.rs:9:33
+  |
+9 | use crate::core::layer::{Layer, LayerType};
+  |                                 ^^^^^^^^^ no `LayerType` in `core::layer`
+
+error[E0432]: unresolved imports `crate::core::layer::LayerType`, `crate::core::layer::LayerId`
+  --> src/ui/layers_panel.rs:11:33
+   |
+11 | use crate::core::layer::{Layer, LayerType, LayerId, LayerManager};
+   |                                 ^^^^^^^^^  ^^^^^^^
+   |                                 |          |
+   |                                 |          no `LayerId` in `core::layer`
+   |                                 |          help: a similar name exists in the module: `Layer`
+   |                                 no `LayerType` in `core::layer`
+
+error[E0432]: unresolved imports `super::VectorText`, `super::Fill`
+ --> src/vector/shape.rs:1:25
+  |
+1 | use super::{VectorPath, VectorText, Fill};
+  |                         ^^^^^^^^^^  ^^^^ no `Fill` in `vector`
+  |                         |
+  |                         no `VectorText` in `vector`
+  |
+  = help: consider importing this variant instead:
+          crate::tools::ToolType::VectorText
+  = help: consider importing one of these items instead:
+          crate::tools::ToolType::Fill
+          gtk4::Align::Fill
+          gtk4::Justification::Fill
+          rand::Fill
+
+error[E0432]: unresolved import `core::layers`
+  --> src/lib.rs:14:15
+   |
+14 | pub use core::layers::{Layer, LayerManager};
+   |               ^^^^^^ could not find `layers` in `core`
+
+error[E0407]: method `name` is not a member of trait `ToolImpl`
+  --> src/tools/text.rs:60:5
+   |
+60 | /     fn name(&self) -> &'static str {
+61 | |         self.name
+62 | |     }
+   | |_____^ not a member of trait `ToolImpl`
+
+error[E0407]: method `icon` is not a member of trait `ToolImpl`
+  --> src/tools/text.rs:64:5
+   |
+64 | /     fn icon(&self) -> &'static str {
+65 | |         self.icon
+66 | |     }
+   | |_____^ not a member of trait `ToolImpl`
+
+error[E0407]: method `tooltip` is not a member of trait `ToolImpl`
+  --> src/tools/text.rs:68:5
+   |
+68 | /     fn tooltip(&self) -> &'static str {
+69 | |         self.tooltip
+70 | |     }
+   | |_____^ not a member of trait `ToolImpl`
+
+error[E0407]: method `tool_type` is not a member of trait `ToolImpl`
+  --> src/tools/text.rs:72:5
+   |
+72 | /     fn tool_type(&self) -> Tool {
+73 | |         Tool::Text
+74 | |     }
+   | |_____^ not a member of trait `ToolImpl`
+
+error[E0407]: method `activate` is not a member of trait `ToolImpl`
+  --> src/tools/text.rs:76:5
+   |
+76 | /     fn activate(&mut self) {
+77 | |         self.active = true;
+78 | |     }
+   | |_____^ not a member of trait `ToolImpl`
+
+error[E0407]: method `deactivate` is not a member of trait `ToolImpl`
+  --> src/tools/text.rs:80:5
+   |
+80 | /     fn deactivate(&mut self) {
+81 | |         self.active = false;
+82 | |         self.is_editing = false;
+83 | |     }
+   | |_____^ not a member of trait `ToolImpl`
+
+error[E0407]: method `handle_mouse_down` is not a member of trait `ToolImpl`
+  --> src/tools/text.rs:85:5
+   |
+85 |       fn handle_mouse_down(&mut self, x: f64, y: f64, _button: u32) {
+   |       ^  ----------------- help: there is an associated function with a similar name: `on_mouse_down`
+   |  _____|
+   | |
+86 | |         self.position_x = x;
+87 | |         self.position_y = y;
+88 | |         self.is_editing = true;
+...  |
+92 | |     }
+   | |_____^ not a member of trait `ToolImpl`
+
+error[E0407]: method `handle_mouse_move` is not a member of trait `ToolImpl`
+  --> src/tools/text.rs:94:5
+   |
+94 | /     fn handle_mouse_move(&mut self, _x: f64, _y: f64) {
+95 | |         // Text tool typically doesn't do anything on mouse move
+96 | |     }
+   | |_____^ not a member of trait `ToolImpl`
+
+error[E0407]: method `handle_mouse_up` is not a member of trait `ToolImpl`
+   --> src/tools/text.rs:98:5
+    |
+98  |       fn handle_mouse_up(&mut self, _x: f64, _y: f64, _button: u32) {
+    |       ^  --------------- help: there is an associated function with a similar name: `on_mouse_up`
+    |  _____|
+    | |
+...   |
+101 | |     }
+    | |_____^ not a member of trait `ToolImpl`
+
+error[E0407]: method `handle_key_press` is not a member of trait `ToolImpl`
+   --> src/tools/text.rs:103:5
+    |
+103 | /     fn handle_key_press(&mut self, key: &str) {
+104 | |         if self.is_editing {
+105 | |             match key {
+106 | |                 "Escape" => {
+...   |
+127 | |     }
+    | |_____^ not a member of trait `ToolImpl`
+
+error[E0407]: method `handle_key_release` is not a member of trait `ToolImpl`
+   --> src/tools/text.rs:129:5
+    |
+129 | /     fn handle_key_release(&mut self, _key: &str) {
+130 | |         // No special handling needed for key release
+131 | |     }
+    | |_____^ not a member of trait `ToolImpl`
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Luma` in this scope
+  --> src/filters/blur.rs:89:38
+   |
+89 |                 gray.put_pixel(x, y, Luma([gray_val]));
+   |                                      ^^^^ not found in this scope
+   |
+help: consider importing this tuple struct
+   |
+1  + use image::Luma;
+   |
+
+error[E0425]: cannot find function `filter` in module `imageproc::filter`
+   --> src/filters/mod.rs:482:44
+    |
+482 |         let sharpened = imageproc::filter::filter(&img, &kernel);
+    |                                            ^^^^^^ not found in `imageproc::filter`
+
+error[E0412]: cannot find type `Canvas` in this scope
+   --> src/tools/text.rs:133:46
+    |
+133 |     fn on_mouse_down(&mut self, canvas: &mut Canvas, x: f64, y: f64) -> bool {
+    |                                              ^^^^^^ not found in this scope
+    |
+help: consider importing one of these items
+    |
+1   + use crate::Canvas;
+    |
+1   + use crate::ui::canvas::Canvas;
+    |
+1   + use imageproc::drawing::Canvas;
+    |
+
+error[E0433]: failed to resolve: use of undeclared type `VectorShape`
+   --> src/tools/text.rs:138:29
+    |
+138 |                 let shape = VectorShape::rectangle(x, y, 100.0, 20.0);
+    |                             ^^^^^^^^^^^ use of undeclared type `VectorShape`
+    |
+help: consider importing one of these items
+    |
+1   + use crate::VectorShape;
+    |
+1   + use crate::vector::shape::VectorShape;
+    |
+
+error[E0412]: cannot find type `Canvas` in this scope
+   --> src/tools/text.rs:149:46
+    |
+149 |     fn on_mouse_drag(&mut self, canvas: &mut Canvas, x: f64, y: f64) -> bool {
+    |                                              ^^^^^^ not found in this scope
+    |
+help: consider importing one of these items
+    |
+1   + use crate::Canvas;
+    |
+1   + use crate::ui::canvas::Canvas;
+    |
+1   + use imageproc::drawing::Canvas;
+    |
+
+error[E0412]: cannot find type `Canvas` in this scope
+   --> src/tools/text.rs:154:44
+    |
+154 |     fn on_mouse_up(&mut self, canvas: &mut Canvas, x: f64, y: f64) -> bool {
+    |                                            ^^^^^^ not found in this scope
+    |
+help: consider importing one of these items
+    |
+1   + use crate::Canvas;
+    |
+1   + use crate::ui::canvas::Canvas;
+    |
+1   + use imageproc::drawing::Canvas;
+    |
+
+error[E0412]: cannot find type `VectorDocument` in this scope
+  --> src/ui/canvas.rs:22:33
+   |
+22 |     pub vector_document: Option<VectorDocument>,
+   |                                 ^^^^^^^^^^^^^^ not found in this scope
+   |
+help: consider importing one of these structs
+   |
+1  + use crate::vector::VectorDocument;
+   |
+1  + use crate::vector::document::VectorDocument;
+   |
+
+error[E0412]: cannot find type `LayerManager` in this scope
+  --> src/ui/canvas.rs:23:31
+   |
+23 |     pub layer_manager: Option<LayerManager>,
+   |                               ^^^^^^^^^^^^ not found in this scope
+   |
+help: consider importing this struct through its public re-export
+   |
+1  + use crate::core::LayerManager;
+   |
+
+error[E0412]: cannot find type `Selection` in this scope
+  --> src/ui/canvas.rs:24:27
+   |
+24 |     pub selection: Option<Selection>,
+   |                           ^^^^^^^^^ not found in this scope
+   |
+help: consider importing one of these structs
+   |
+1  + use crate::core::Selection;
+   |
+1  + use crate::core::canvas::Selection;
+   |
+
+error[E0412]: cannot find type `ToolContext` in this scope
+  --> src/ui/canvas.rs:25:30
+   |
+25 |     pub tool_context: Option<ToolContext>,
+   |                              ^^^^^^^^^^^ not found in this scope
+   |
+help: you might be missing a type parameter
+   |
+13 | pub struct Canvas<ToolContext> {
+   |                  +++++++++++++
+
+error[E0412]: cannot find type `ColorPicker` in this scope
+  --> src/ui/canvas.rs:26:23
+   |
+26 |     pub color_picker: ColorPicker,
+   |                       ^^^^^^^^^^^ not found in this scope
+   |
+help: consider importing this struct through its public re-export
+   |
+1  + use crate::ui::ColorPicker;
+   |
+
+error[E0433]: failed to resolve: use of undeclared type `ColorPicker`
+  --> src/ui/canvas.rs:54:27
+   |
+54 |             color_picker: ColorPicker::new(),
+   |                           ^^^^^^^^^^^ use of undeclared type `ColorPicker`
+   |
+help: consider importing this struct through its public re-export
+   |
+1  + use crate::ui::ColorPicker;
+   |
+
+error[E0412]: cannot find type `VectorDocument` in this scope
+  --> src/ui/canvas.rs:68:53
+   |
+68 |     pub fn set_vector_document(&mut self, document: VectorDocument) {
+   |                                                     ^^^^^^^^^^^^^^ not found in this scope
+   |
+help: consider importing one of these structs
+   |
+1  + use crate::vector::VectorDocument;
+   |
+1  + use crate::vector::document::VectorDocument;
+   |
+
+error[E0412]: cannot find type `LayerManager` in this scope
+  --> src/ui/canvas.rs:73:56
+   |
+73 |     pub fn set_layer_manager(&mut self, layer_manager: LayerManager) {
+   |                                                        ^^^^^^^^^^^^ not found in this scope
+   |
+help: consider importing this struct through its public re-export
+   |
+1  + use crate::core::LayerManager;
+   |
+
+error[E0412]: cannot find type `ToolContext` in this scope
+  --> src/ui/canvas.rs:78:54
+   |
+78 |     pub fn set_tool_context(&mut self, tool_context: ToolContext) {
+   |                                                      ^^^^^^^^^^^ not found in this scope
+
+error[E0412]: cannot find type `VectorDocument` in this scope
+   --> src/ui/canvas.rs:105:56
+    |
+105 |     fn draw_vector_document(&self, cr: &Context, doc: &VectorDocument) {
+    |                                                        ^^^^^^^^^^^^^^ not found in this scope
+    |
+help: consider importing one of these structs
+    |
+1   + use crate::vector::VectorDocument;
+    |
+1   + use crate::vector::document::VectorDocument;
+    |
+
+error[E0433]: failed to resolve: use of undeclared type `PositionType`
+  --> src/ui/filters_panel.rs:50:39
+   |
+50 |         intensity_scale.set_value_pos(PositionType::Right);
+   |                                       ^^^^^^^^^^^^ use of undeclared type `PositionType`
+   |
+help: consider importing this enum
+   |
+1  + use gtk4::PositionType;
+   |
+
+error[E0433]: failed to resolve: use of undeclared type `PathNodeType`
+    --> src/vector/shape.rs:1033:17
+     |
+1033 |                 PathNodeType::Line => {
+     |                 ^^^^^^^^^^^^ use of undeclared type `PathNodeType`
+     |
+help: consider importing this enum through its public re-export
+     |
+1    + use crate::vector::PathNodeType;
+     |
+
+error[E0433]: failed to resolve: use of undeclared type `PathNodeType`
+    --> src/vector/shape.rs:1036:17
+     |
+1036 |                 PathNodeType::Curve => {
+     |                 ^^^^^^^^^^^^ use of undeclared type `PathNodeType`
+     |
+help: consider importing this enum through its public re-export
+     |
+1    + use crate::vector::PathNodeType;
+     |
+
+error[E0603]: struct import `Settings` is private
+  --> src/ui/mod.rs:37:20
+   |
+37 | pub use settings::{Settings, SettingsDialog, SettingsManager};
+   |                    ^^^^^^^^ private struct import
+   |
+note: the struct import `Settings` is defined here...
+  --> src/ui/settings.rs:14:29
+   |
+14 | use crate::core::settings::{Settings, PerformanceSettings, SaveSettings, DisplaySettings};
+   |                             ^^^^^^^^
+note: ...and refers to the struct `Settings` which is defined here
+  --> src/core/settings.rs:9:1
+   |
+9  | pub struct Settings {
+   | ^^^^^^^^^^^^^^^^^^^ you could import this directly
+help: import `Settings` directly
+   |
+37 | pub use settings::{core::settings::Settings, SettingsDialog, SettingsManager};
+   |                    ~~~~~~~~~~~~~~~~~~~~~~~~
+
+error[E0603]: struct import `Path` is private
+   --> src/tools/vector_tools.rs:7:5
+    |
+7   |     Path, PathNode, PathNodeType, BezierPoint,
+    |     ^^^^ private struct import
+    |
+note: the struct import `Path` is defined here...
+   --> src/vector/mod.rs:6:38
+    |
+6   | use gtk4::cairo::{LineCap, LineJoin, Path, Pattern};
+    |                                      ^^^^
+note: ...and refers to the struct `Path` which is defined here
+   --> /home/matt/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cairo-rs-0.18.5/src/lib.rs:236:13
+    |
+236 |     paths::{Path, PathSegment, PathSegments},
+    |             ^^^^ you could import this directly
+help: import `Path` through the re-export
+    |
+7   |     cairo::Path, PathNode, PathNodeType, BezierPoint,
+    |     ~~~~~~~~~~~
+
+warning: unused import: `std::collections::HashMap`
+ --> src/core/layer.rs:4:5
+  |
+4 | use std::collections::HashMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused imports: `DrawingArea`, `EventControllerMotion`, `GestureClick`, `GestureDrag`, and `Orientation`
+ --> src/core/canvas.rs:2:12
+  |
+2 | use gtk4::{DrawingArea, EventControllerMotion, GestureClick, GestureDrag, Orientation};
+  |            ^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^  ^^^^^^^^^^^  ^^^^^^^^^^^
+
+warning: unused imports: `Format` and `ImageSurface`
+ --> src/core/canvas.rs:3:22
+  |
+3 | use cairo::{Context, Format, ImageSurface};
+  |                      ^^^^^^  ^^^^^^^^^^^^
+
+warning: unused import: `std::cell::RefCell`
+ --> src/core/canvas.rs:4:5
+  |
+4 | use std::cell::RefCell;
+  |     ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::rc::Rc`
+ --> src/core/canvas.rs:5:5
+  |
+5 | use std::rc::Rc;
+  |     ^^^^^^^^^^^
+
+warning: unused imports: `VectorPath` and `VectorShape`
+ --> src/core/canvas.rs:6:28
+  |
+6 | use crate::vector::{Point, VectorPath, VectorDocument, VectorShape};
+  |                            ^^^^^^^^^^                  ^^^^^^^^^^^
+
+warning: unused import: `std::collections::HashMap`
+ --> src/core/canvas.rs:8:5
+  |
+8 | use std::collections::HashMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `UNIX_EPOCH`
+ --> src/core/document.rs:2:29
+  |
+2 | use std::time::{SystemTime, UNIX_EPOCH};
+  |                             ^^^^^^^^^^
+
+warning: unused import: `uuid::Uuid`
+ --> src/core/document.rs:4:5
+  |
+4 | use uuid::Uuid;
+  |     ^^^^^^^^^^
+
+warning: unused import: `ImageBuffer`
+ --> src/core/document.rs:5:45
+  |
+5 | use image::{DynamicImage, GenericImageView, ImageBuffer, Rgba};
+  |                                             ^^^^^^^^^^^
+
+warning: unused import: `Path`
+ --> src/core/settings.rs:3:17
+  |
+3 | use std::path::{Path, PathBuf};
+  |                 ^^^^
+
+warning: unused imports: `debug`, `error`, and `warn`
+ --> src/core/settings.rs:6:11
+  |
+6 | use log::{debug, error, info, warn};
+  |           ^^^^^  ^^^^^        ^^^^
+
+warning: unused import: `imageproc::contrast::threshold`
+ --> src/filters/mod.rs:4:5
+  |
+4 | use imageproc::contrast::threshold;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `imageproc::gradients::sobel_gradients`
+ --> src/filters/mod.rs:6:5
+  |
+6 | use imageproc::gradients::sobel_gradients;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `imageproc::map::map_colors`
+ --> src/filters/mod.rs:7:5
+  |
+7 | use imageproc::map::map_colors;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `imageproc::pixelops::weighted_sum`
+ --> src/filters/mod.rs:8:5
+  |
+8 | use imageproc::pixelops::weighted_sum;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `warn`
+ --> src/filters/mod.rs:9:38
+  |
+9 | use log::{debug, error, info, trace, warn};
+  |                                      ^^^^
+
+warning: unused import: `warn`
+ --> src/filters/blur.rs:5:31
+  |
+5 | use log::{debug, info, trace, warn};
+  |                               ^^^^
+
+warning: unnecessary parentheses around assigned value
+   --> src/filters/blur.rs:203:33
+    |
+203 |                         let r = (p00[0] as f32 * w00 + p01[0] as f32 * w01 + 
+    |                                 ^
+204 |                                  p10[0] as f32 * w10 + p11[0] as f32 * w11);
+    |                                                                           ^
+    |
+    = note: `#[warn(unused_parens)]` on by default
+help: remove these parentheses
+    |
+203 ~                         let r = p00[0] as f32 * w00 + p01[0] as f32 * w01 + 
+204 ~                                  p10[0] as f32 * w10 + p11[0] as f32 * w11;
+    |
+
+warning: unnecessary parentheses around assigned value
+   --> src/filters/blur.rs:205:33
+    |
+205 |                         let g = (p00[1] as f32 * w00 + p01[1] as f32 * w01 + 
+    |                                 ^
+206 |                                  p10[1] as f32 * w10 + p11[1] as f32 * w11);
+    |                                                                           ^
+    |
+help: remove these parentheses
+    |
+205 ~                         let g = p00[1] as f32 * w00 + p01[1] as f32 * w01 + 
+206 ~                                  p10[1] as f32 * w10 + p11[1] as f32 * w11;
+    |
+
+warning: unnecessary parentheses around assigned value
+   --> src/filters/blur.rs:207:33
+    |
+207 |                         let b = (p00[2] as f32 * w00 + p01[2] as f32 * w01 + 
+    |                                 ^
+208 |                                  p10[2] as f32 * w10 + p11[2] as f32 * w11);
+    |                                                                           ^
+    |
+help: remove these parentheses
+    |
+207 ~                         let b = p00[2] as f32 * w00 + p01[2] as f32 * w01 + 
+208 ~                                  p10[2] as f32 * w10 + p11[2] as f32 * w11;
+    |
+
+warning: unnecessary parentheses around assigned value
+   --> src/filters/blur.rs:209:33
+    |
+209 |                         let a = (p00[3] as f32 * w00 + p01[3] as f32 * w01 + 
+    |                                 ^
+210 |                                  p10[3] as f32 * w10 + p11[3] as f32 * w11);
+    |                                                                           ^
+    |
+help: remove these parentheses
+    |
+209 ~                         let a = p00[3] as f32 * w00 + p01[3] as f32 * w01 + 
+210 ~                                  p10[3] as f32 * w10 + p11[3] as f32 * w11;
+    |
+
+warning: unnecessary parentheses around assigned value
+   --> src/filters/blur.rs:353:33
+    |
+353 |                         let r = (p00[0] as f32 * w00 + p01[0] as f32 * w01 + 
+    |                                 ^
+354 |                                  p10[0] as f32 * w10 + p11[0] as f32 * w11);
+    |                                                                           ^
+    |
+help: remove these parentheses
+    |
+353 ~                         let r = p00[0] as f32 * w00 + p01[0] as f32 * w01 + 
+354 ~                                  p10[0] as f32 * w10 + p11[0] as f32 * w11;
+    |
+
+warning: unnecessary parentheses around assigned value
+   --> src/filters/blur.rs:355:33
+    |
+355 |                         let g = (p00[1] as f32 * w00 + p01[1] as f32 * w01 + 
+    |                                 ^
+356 |                                  p10[1] as f32 * w10 + p11[1] as f32 * w11);
+    |                                                                           ^
+    |
+help: remove these parentheses
+    |
+355 ~                         let g = p00[1] as f32 * w00 + p01[1] as f32 * w01 + 
+356 ~                                  p10[1] as f32 * w10 + p11[1] as f32 * w11;
+    |
+
+warning: unnecessary parentheses around assigned value
+   --> src/filters/blur.rs:357:33
+    |
+357 |                         let b = (p00[2] as f32 * w00 + p01[2] as f32 * w01 + 
+    |                                 ^
+358 |                                  p10[2] as f32 * w10 + p11[2] as f32 * w11);
+    |                                                                           ^
+    |
+help: remove these parentheses
+    |
+357 ~                         let b = p00[2] as f32 * w00 + p01[2] as f32 * w01 + 
+358 ~                                  p10[2] as f32 * w10 + p11[2] as f32 * w11;
+    |
+
+warning: unnecessary parentheses around assigned value
+   --> src/filters/blur.rs:359:33
+    |
+359 |                         let a = (p00[3] as f32 * w00 + p01[3] as f32 * w01 + 
+    |                                 ^
+360 |                                  p10[3] as f32 * w10 + p11[3] as f32 * w11);
+    |                                                                           ^
+    |
+help: remove these parentheses
+    |
+359 ~                         let a = p00[3] as f32 * w00 + p01[3] as f32 * w01 + 
+360 ~                                  p10[3] as f32 * w10 + p11[3] as f32 * w11;
+    |
+
+warning: unused import: `DynamicImage`
+ --> src/filters/color.rs:1:13
+  |
+1 | use image::{DynamicImage, Rgba, GenericImageView, ImageBuffer};
+  |             ^^^^^^^^^^^^
+
+warning: unused import: `DynamicImage`
+ --> src/filters/artistic.rs:1:13
+  |
+1 | use image::{DynamicImage, Rgba, GenericImageView, ImageBuffer};
+  |             ^^^^^^^^^^^^
+
+warning: unused import: `rand::distributions::Uniform`
+ --> src/filters/artistic.rs:4:5
+  |
+4 | use rand::distributions::Uniform;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `DynamicImage`
+ --> src/filters/distort.rs:1:13
+  |
+1 | use image::{DynamicImage, Rgba, GenericImageView, ImageBuffer};
+  |             ^^^^^^^^^^^^
+
+warning: unused import: `color::*`
+  --> src/filters/mod.rs:19:9
+   |
+19 | pub use color::*;
+   |         ^^^^^^^^
+
+warning: unused import: `SelectionState`
+ --> src/tools/selection.rs:3:34
+  |
+3 | use crate::vector::{VectorShape, SelectionState};
+  |                                  ^^^^^^^^^^^^^^
+
+warning: unused import: `crate::vector::document::VectorDocument`
+ --> src/tools/selection.rs:4:5
+  |
+4 | use crate::vector::document::VectorDocument;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::vector::shape::VectorShape as ShapeImpl`
+ --> src/tools/selection.rs:5:5
+  |
+5 | use crate::vector::shape::VectorShape as ShapeImpl;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::vector::text::TextShape`
+ --> src/tools/selection.rs:6:5
+  |
+6 | use crate::vector::text::TextShape;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `GenericImageView`, `ImageBuffer`, and `Rgba`
+ --> src/tools/selection.rs:7:13
+  |
+7 | use image::{ImageBuffer, Rgba, GenericImageView};
+  |             ^^^^^^^^^^^  ^^^^  ^^^^^^^^^^^^^^^^
+
+warning: unused import: `super::ToolImpl`
+ --> src/tools/selection.rs:8:5
+  |
+8 | use super::ToolImpl;
+  |     ^^^^^^^^^^^^^^^
+
+warning: unused import: `Layer`
+ --> src/tools/heal.rs:2:27
+  |
+2 | use crate::core::{Canvas, Layer};
+  |                           ^^^^^
+
+warning: unused imports: `ImageBuffer` and `Rgba`
+ --> src/tools/heal.rs:4:13
+  |
+4 | use image::{ImageBuffer, Rgba};
+  |             ^^^^^^^^^^^  ^^^^
+
+warning: unused import: `Point`
+ --> src/tools/crop.rs:2:21
+  |
+2 | use crate::vector::{Point, Rect};
+  |                     ^^^^^
+
+warning: unused import: `Layer`
+ --> src/tools/gradient.rs:5:19
+  |
+5 | use crate::core::{Layer};
+  |                   ^^^^^
+
+warning: unused import: `cairo::Context`
+ --> src/tools/gradient.rs:7:5
+  |
+7 | use cairo::Context;
+  |     ^^^^^^^^^^^^^^
+
+warning: unused import: `gtk4::gdk::RGBA`
+ --> src/tools/vector_tools.rs:2:5
+  |
+2 | use gtk4::gdk::RGBA;
+  |     ^^^^^^^^^^^^^^^
+
+warning: unused imports: `BezierPoint`, `FillStyle`, `FontStyle`, `LineDash`, `PathNode`, `SelectionState`, `ShapeType`, `StrokeStyle`, `TextShape`, `Transform`, and `VectorLayer`
+ --> src/tools/vector_tools.rs:4:18
+  |
+4 |     Point, Rect, Transform, SelectionState,
+  |                  ^^^^^^^^^  ^^^^^^^^^^^^^^
+5 |     VectorShape, ShapeType, FillStyle, StrokeStyle, Color, LineDash,
+  |                  ^^^^^^^^^  ^^^^^^^^^  ^^^^^^^^^^^         ^^^^^^^^
+6 |     TextShape, TextStyle, TextAlignment, FontWeight, FontStyle,
+  |     ^^^^^^^^^                                        ^^^^^^^^^
+7 |     Path, PathNode, PathNodeType, BezierPoint,
+  |           ^^^^^^^^                ^^^^^^^^^^^
+8 |     VectorDocument, VectorLayer
+  |                     ^^^^^^^^^^^
+
+warning: unused import: `crate::core::Canvas`
+  --> src/tools/vector_tools.rs:11:5
+   |
+11 | use crate::core::Canvas;
+   |     ^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `DynamicImage`, `ImageBuffer`, and `Rgba`
+  --> src/tools/mod.rs:22:13
+   |
+22 | use image::{DynamicImage, ImageBuffer, Rgba};
+   |             ^^^^^^^^^^^^  ^^^^^^^^^^^  ^^^^
+
+warning: unused imports: `Color`, `LayerManager`, `Layer`, and `Selection`
+  --> src/tools/mod.rs:23:27
+   |
+23 | use crate::core::{Canvas, Layer, LayerManager, Selection, Color};
+   |                           ^^^^^  ^^^^^^^^^^^^  ^^^^^^^^^  ^^^^^
+
+warning: unused import: `crate::core::Point as CorePoint`
+  --> src/tools/mod.rs:24:5
+   |
+24 | use crate::core::Point as CorePoint;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::core::selection::Selection as CoreSelection`
+  --> src/tools/mod.rs:25:5
+   |
+25 | use crate::core::selection::Selection as CoreSelection;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `Point as VectorPoint`, `Rect`, and `VectorDocument`
+  --> src/tools/mod.rs:27:21
+   |
+27 | use crate::vector::{Point as VectorPoint, VectorDocument, Rect};
+   |                     ^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^  ^^^^
+
+warning: unused imports: `Adjustment`, `Align`, `Application`, `Box`, `Button`, `CellRendererText`, `CheckButton`, `ComboBoxText`, `CssProvider`, `DrawingArea`, `DropDown`, `Entry`, `FileChooserAction`, `FileChooserDialog`, `FileFilter`, `Fixed`, `Grid`, `HeaderBar`, `IconSize`, `Image`, `Label`, `ListStore`, `MenuButton`, `NotebookPage`, `Notebook`, `Orientation`, `Overlay`, `Paned`, `PolicyType`, `ResponseType`, `STYLE_PROVIDER_PRIORITY_APPLICATION`, `ScrolledWindow`, `SpinButton`, `StyleContext`, `ToggleButton`, `TreeViewColumn`, and `TreeView`
+ --> src/ui/mod.rs:3:12
+  |
+3 | use gtk4::{Application, ApplicationWindow, Box, Button, DrawingArea, 
+  |            ^^^^^^^^^^^                     ^^^  ^^^^^^  ^^^^^^^^^^^
+4 |            ScrolledWindow, Notebook, Label, Image, 
+  |            ^^^^^^^^^^^^^^  ^^^^^^^^  ^^^^^  ^^^^^
+5 |            CellRendererText, TreeView, TreeViewColumn, ListStore, ComboBoxText, 
+  |            ^^^^^^^^^^^^^^^^  ^^^^^^^^  ^^^^^^^^^^^^^^  ^^^^^^^^^  ^^^^^^^^^^^^
+6 |            Align, PolicyType, DropDown, Orientation, CssProvider, StyleContext,
+  |            ^^^^^  ^^^^^^^^^^  ^^^^^^^^  ^^^^^^^^^^^  ^^^^^^^^^^^  ^^^^^^^^^^^^
+7 |            STYLE_PROVIDER_PRIORITY_APPLICATION, ToggleButton, CheckButton, SpinButton, Adjustment,
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^  ^^^^^^^^^^^  ^^^^^^^^^^  ^^^^^^^^^^
+8 |            Entry, FileChooserAction, FileChooserDialog, Grid, HeaderBar, IconSize,
+  |            ^^^^^  ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^  ^^^^  ^^^^^^^^^  ^^^^^^^^
+9 |            MenuButton, NotebookPage, Paned, ResponseType, FileFilter, Overlay, Fixed};
+  |            ^^^^^^^^^^  ^^^^^^^^^^^^  ^^^^^  ^^^^^^^^^^^^  ^^^^^^^^^^  ^^^^^^^  ^^^^^
+
+warning: unused import: `adw::prelude::*`
+  --> src/ui/mod.rs:12:5
+   |
+12 | use adw::prelude::*;
+   |     ^^^^^^^^^^^^^^^
+
+warning: unused import: `gtk4::gdk`
+  --> src/ui/mod.rs:13:5
+   |
+13 | use gtk4::gdk;
+   |     ^^^^^^^^^
+
+warning: unused import: `std::cell::RefCell`
+  --> src/ui/mod.rs:14:5
+   |
+14 | use std::cell::RefCell;
+   |     ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::rc::Rc`
+  --> src/ui/mod.rs:15:5
+   |
+15 | use std::rc::Rc;
+   |     ^^^^^^^^^^^
+
+warning: unused imports: `PathBuf` and `Path`
+  --> src/ui/mod.rs:16:17
+   |
+16 | use std::path::{Path, PathBuf};
+   |                 ^^^^  ^^^^^^^
+
+warning: unused import: `std::fs`
+  --> src/ui/mod.rs:17:5
+   |
+17 | use std::fs;
+   |     ^^^^^^^
+
+warning: unused imports: `debug`, `error`, `info`, and `warn`
+  --> src/ui/mod.rs:18:11
+   |
+18 | use log::{info, debug, warn, error};
+   |           ^^^^  ^^^^^  ^^^^  ^^^^^
+
+warning: unused import: `crate::core::layer::Layer`
+  --> src/ui/mod.rs:20:5
+   |
+20 | use crate::core::layer::Layer;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `gtk4::glib::clone`
+  --> src/ui/mod.rs:21:5
+   |
+21 | use gtk4::glib::clone;
+   |     ^^^^^^^^^^^^^^^^^
+
+warning: unused import: `gtk4::glib`
+  --> src/ui/mod.rs:22:5
+   |
+22 | use gtk4::glib;
+   |     ^^^^^^^^^^
+
+warning: unused import: `crate::core::canvas::Canvas`
+  --> src/ui/mod.rs:23:5
+   |
+23 | use crate::core::canvas::Canvas;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `Point` and `VectorDocument`
+  --> src/ui/mod.rs:24:21
+   |
+24 | use crate::vector::{VectorDocument, Point};
+   |                     ^^^^^^^^^^^^^^  ^^^^^
+
+warning: unused imports: `CellRendererText`, `DialogFlags`, `ListStore`, `TreeViewColumn`, and `TreeView`
+ --> src/ui/settings.rs:3:35
+  |
+3 |     Align, Box as GtkBox, Button, CellRendererText, ComboBoxText, Dialog, DialogFlags,
+  |                                   ^^^^^^^^^^^^^^^^                        ^^^^^^^^^^^
+4 |     Entry, Grid, HeaderBar, Label, ListStore, Notebook, ResponseType, Scale, SpinButton,
+  |                                    ^^^^^^^^^
+5 |     Switch, TreeView, TreeViewColumn,
+  |             ^^^^^^^^  ^^^^^^^^^^^^^^
+
+warning: unused imports: `Clamp`, `HeaderBar as AdwHeaderBar`, and `WindowTitle`
+ --> src/ui/settings.rs:9:11
+  |
+9 | use adw::{HeaderBar as AdwHeaderBar, Clamp, WindowTitle};
+  |           ^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^  ^^^^^^^^^^^
+
+warning: unused import: `debug`
+  --> src/ui/settings.rs:12:11
+   |
+12 | use log::{debug, info};
+   |           ^^^^^
+
+warning: unused imports: `DisplaySettings`, `PerformanceSettings`, and `SaveSettings`
+  --> src/ui/settings.rs:14:39
+   |
+14 | use crate::core::settings::{Settings, PerformanceSettings, SaveSettings, DisplaySettings};
+   |                                       ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^  ^^^^^^^^^^^^^^^
+
+warning: unused imports: `DrawingArea`, `HeaderBar`, `Overlay`, `StackSwitcher`, `Stack`, and `ToggleButton`
+ --> src/ui/main_window.rs:3:60
+  |
+3 |     Application, ApplicationWindow, Box as GtkBox, Button, DrawingArea, FileChooserAction,
+  |                                                            ^^^^^^^^^^^
+4 |     FileChooserDialog, HeaderBar, Label, Notebook, Overlay, ResponseType, ScrolledWindow,
+  |                        ^^^^^^^^^                   ^^^^^^^
+5 |     Stack, StackSwitcher, ToggleButton,
+  |     ^^^^^  ^^^^^^^^^^^^^  ^^^^^^^^^^^^
+
+warning: unused import: `Clamp`
+ --> src/ui/main_window.rs:9:38
+  |
+9 | use adw::{HeaderBar as AdwHeaderBar, Clamp, WindowTitle};
+  |                                      ^^^^^
+
+warning: unused import: `std::fs::File`
+  --> src/ui/main_window.rs:13:5
+   |
+13 | use std::fs::File;
+   |     ^^^^^^^^^^^^^
+
+warning: unused import: `std::io::Read`
+  --> src/ui/main_window.rs:14:5
+   |
+14 | use std::io::Read;
+   |     ^^^^^^^^^^^^^
+
+warning: unused import: `debug`
+  --> src/ui/main_window.rs:15:11
+   |
+15 | use log::{debug, info, warn, error};
+   |           ^^^^^
+
+warning: unused import: `DocumentFormat`
+  --> src/ui/main_window.rs:17:39
+   |
+17 | use crate::core::document::{Document, DocumentFormat};
+   |                                       ^^^^^^^^^^^^^^
+
+warning: unused import: `Layer`
+  --> src/ui/main_window.rs:18:26
+   |
+18 | use crate::core::layer::{Layer, LayerType};
+   |                          ^^^^^
+
+warning: unused import: `ToolType`
+  --> src/ui/main_window.rs:19:20
+   |
+19 | use crate::tools::{ToolType, ToolManager};
+   |                    ^^^^^^^^
+
+warning: unused imports: `EventControllerMotion`, `EventControllerScroll`, `GestureDrag`, and `GestureZoom`
+ --> src/ui/canvas.rs:2:25
+  |
+2 | use gtk4::{DrawingArea, GestureZoom, EventControllerMotion, EventControllerScroll, GestureDrag};
+  |                         ^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^
+
+warning: unused imports: `Format` and `ImageSurface`
+ --> src/ui/canvas.rs:3:22
+  |
+3 | use cairo::{Context, Format, ImageSurface};
+  |                      ^^^^^^  ^^^^^^^^^^^^
+
+warning: unused import: `std::cell::RefCell`
+ --> src/ui/canvas.rs:4:5
+  |
+4 | use std::cell::RefCell;
+  |     ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::rc::Rc`
+ --> src/ui/canvas.rs:5:5
+  |
+5 | use std::rc::Rc;
+  |     ^^^^^^^^^^^
+
+warning: unused imports: `debug`, `error`, and `warn`
+ --> src/ui/canvas.rs:6:11
+  |
+6 | use log::{debug, info, warn, error};
+  |           ^^^^^        ^^^^  ^^^^^
+
+warning: unused import: `Layer`
+ --> src/ui/canvas.rs:9:26
+  |
+9 | use crate::core::layer::{Layer, LayerType};
+  |                          ^^^^^
+
+warning: unused import: `ToolType`
+  --> src/ui/canvas.rs:10:20
+   |
+10 | use crate::tools::{ToolType, ToolManager};
+   |                    ^^^^^^^^
+
+warning: unused imports: `Entry` and `Image`
+ --> src/ui/layers_panel.rs:4:47
+  |
+4 |     ScrolledWindow, TreeView, TreeViewColumn, Image, Entry, Separator,
+  |                                               ^^^^^  ^^^^^
+
+warning: unused import: `debug`
+ --> src/ui/layers_panel.rs:8:11
+  |
+8 | use log::{debug, info};
+  |           ^^^^^
+
+warning: unused import: `Button`
+ --> src/ui/tools_panel.rs:3:20
+  |
+3 |     Box as GtkBox, Button, FlowBox, Image, Label, Orientation, ScrolledWindow,
+  |                    ^^^^^^
+
+warning: unused import: `debug`
+ --> src/ui/tools_panel.rs:8:11
+  |
+8 | use log::{debug, info};
+  |           ^^^^^
+
+warning: unused import: `std::rc::Rc`
+ --> src/ui/history_panel.rs:6:5
+  |
+6 | use std::rc::Rc;
+  |     ^^^^^^^^^^^
+
+warning: unused import: `std::cell::RefCell`
+ --> src/ui/history_panel.rs:7:5
+  |
+7 | use std::cell::RefCell;
+  |     ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `debug`
+ --> src/ui/history_panel.rs:8:11
+  |
+8 | use log::{debug, info};
+  |           ^^^^^
+
+warning: unused imports: `Entry` and `Separator`
+ --> src/ui/filters_panel.rs:3:60
+  |
+3 |     Box as GtkBox, Button, CellRendererText, ComboBoxText, Entry, Label, ListStore,
+  |                                                            ^^^^^
+4 |     Orientation, Scale, ScrolledWindow, Separator, TreeView, TreeViewColumn,
+  |                                         ^^^^^^^^^
+
+warning: unused import: `std::rc::Rc`
+ --> src/ui/filters_panel.rs:6:5
+  |
+6 | use std::rc::Rc;
+  |     ^^^^^^^^^^^
+
+warning: unused import: `std::cell::RefCell`
+ --> src/ui/filters_panel.rs:7:5
+  |
+7 | use std::cell::RefCell;
+  |     ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `debug`
+ --> src/ui/filters_panel.rs:8:11
+  |
+8 | use log::{debug, info};
+  |           ^^^^^
+
+warning: unused imports: `Filter` and `IntensityFilter`
+  --> src/ui/filters_panel.rs:10:22
+   |
+10 | use crate::filters::{Filter, IntensityFilter};
+   |                      ^^^^^^  ^^^^^^^^^^^^^^^
+
+warning: unused import: `std::rc::Rc`
+ --> src/vector/mod.rs:2:5
+  |
+2 | use std::rc::Rc;
+  |     ^^^^^^^^^^^
+
+warning: unused import: `std::cell::RefCell`
+ --> src/vector/mod.rs:3:5
+  |
+3 | use std::cell::RefCell;
+  |     ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::collections::HashMap`
+ --> src/vector/mod.rs:5:5
+  |
+5 | use std::collections::HashMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `LineCap`, `LineJoin`, and `Pattern`
+ --> src/vector/mod.rs:6:19
+  |
+6 | use gtk4::cairo::{LineCap, LineJoin, Path, Pattern};
+  |                   ^^^^^^^  ^^^^^^^^        ^^^^^^^
+
+warning: unused import: `gtk4::gdk::RGBA`
+ --> src/vector/mod.rs:7:5
+  |
+7 | use gtk4::gdk::RGBA;
+  |     ^^^^^^^^^^^^^^^
+
+warning: unused imports: `error` and `info`
+ --> src/vector/mod.rs:9:18
+  |
+9 | use log::{debug, error, info, trace, warn};
+  |                  ^^^^^  ^^^^
+
+warning: unused import: `crate::core::Canvas`
+  --> src/vector/mod.rs:10:5
+   |
+10 | use crate::core::Canvas;
+   |     ^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `VectorPath`
+ --> src/vector/shape.rs:1:13
+  |
+1 | use super::{VectorPath, VectorText, Fill};
+  |             ^^^^^^^^^^
+
+warning: unused import: `Pattern`
+ --> src/vector/shape.rs:4:32
+  |
+4 | use cairo::{LineCap, LineJoin, Pattern};
+  |                                ^^^^^^^
+
+warning: unused imports: `Color`, `SelectionState`, and `VectorObject`
+ --> src/vector/path.rs:3:34
+  |
+3 | use crate::vector::{Point, Rect, VectorObject, Transform, Color, SelectionState};
+  |                                  ^^^^^^^^^^^^             ^^^^^  ^^^^^^^^^^^^^^
+
+warning: unused import: `TextExtents`
+ --> src/vector/text.rs:2:64
+  |
+2 | use cairo::{Context, FontSlant, FontWeight as CairoFontWeight, TextExtents};
+  |                                                                ^^^^^^^^^^^
+
+warning: unused import: `std::collections::HashMap`
+ --> src/vector/document.rs:1:5
+  |
+1 | use std::collections::HashMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `Rect`, `SelectionState`, and `Transform`
+ --> src/vector/document.rs:4:28
+  |
+4 | use crate::vector::{Point, Rect, VectorObject, Transform, SelectionState};
+  |                            ^^^^                ^^^^^^^^^  ^^^^^^^^^^^^^^
+
+warning: unused import: `crate::vector::path::Path`
+ --> src/vector/document.rs:6:5
+  |
+6 | use crate::vector::path::Path;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unexpected `cfg` condition value: `gpu-cuda`
+  --> src/lib.rs:30:11
+   |
+30 |     #[cfg(feature = "gpu-cuda")]
+   |           ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `default`, `gpu-vulkan`, and `gpu-wgpu`
+   = help: consider adding `gpu-cuda` as a feature in `Cargo.toml`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+
+warning: unexpected `cfg` condition value: `gpu-cuda`
+  --> src/lib.rs:35:15
+   |
+35 |     #[cfg(not(feature = "gpu-cuda"))]
+   |               ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `default`, `gpu-vulkan`, and `gpu-wgpu`
+   = help: consider adding `gpu-cuda` as a feature in `Cargo.toml`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `gpu-rocm`
+  --> src/lib.rs:43:11
+   |
+43 |     #[cfg(feature = "gpu-rocm")]
+   |           ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `default`, `gpu-vulkan`, and `gpu-wgpu`
+   = help: consider adding `gpu-rocm` as a feature in `Cargo.toml`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `gpu-rocm`
+  --> src/lib.rs:48:15
+   |
+48 |     #[cfg(not(feature = "gpu-rocm"))]
+   |               ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `default`, `gpu-vulkan`, and `gpu-wgpu`
+   = help: consider adding `gpu-rocm` as a feature in `Cargo.toml`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `gpu-opencl`
+  --> src/lib.rs:56:11
+   |
+56 |     #[cfg(feature = "gpu-opencl")]
+   |           ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `default`, `gpu-vulkan`, and `gpu-wgpu`
+   = help: consider adding `gpu-opencl` as a feature in `Cargo.toml`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `gpu-opencl`
+  --> src/lib.rs:61:15
+   |
+61 |     #[cfg(not(feature = "gpu-opencl"))]
+   |               ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `default`, `gpu-vulkan`, and `gpu-wgpu`
+   = help: consider adding `gpu-opencl` as a feature in `Cargo.toml`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `gpu-cuda`
+  --> src/lib.rs:99:11
+   |
+99 |     #[cfg(feature = "gpu-cuda")]
+   |           ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `default`, `gpu-vulkan`, and `gpu-wgpu`
+   = help: consider adding `gpu-cuda` as a feature in `Cargo.toml`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `gpu-rocm`
+   --> src/lib.rs:108:11
+    |
+108 |     #[cfg(feature = "gpu-rocm")]
+    |           ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected values for `feature` are: `default`, `gpu-vulkan`, and `gpu-wgpu`
+    = help: consider adding `gpu-rocm` as a feature in `Cargo.toml`
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `gpu-opencl`
+   --> src/lib.rs:117:11
+    |
+117 |     #[cfg(feature = "gpu-opencl")]
+    |           ^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected values for `feature` are: `default`, `gpu-vulkan`, and `gpu-wgpu`
+    = help: consider adding `gpu-opencl` as a feature in `Cargo.toml`
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unused import: `GenericImageView`
+ --> src/core/selection.rs:1:32
+  |
+1 | use image::{ImageBuffer, Rgba, GenericImageView};
+  |                                ^^^^^^^^^^^^^^^^
+
+warning: unused import: `gtk4::prelude`
+ --> src/core/canvas.rs:1:5
+  |
+1 | use gtk4::prelude::*;
+  |     ^^^^^^^^^^^^^
+
+warning: unused import: `GenericImageView`
+ --> src/core/document.rs:5:27
+  |
+5 | use image::{DynamicImage, GenericImageView, ImageBuffer, Rgba};
+  |                           ^^^^^^^^^^^^^^^^
+
+warning: unused import: `adw::prelude`
+ --> src/ui/main_window.rs:8:5
+  |
+8 | use adw::prelude::*;
+  |     ^^^^^^^^^^^^
+
+warning: unused import: `adw::prelude`
+ --> src/ui/settings.rs:8:5
+  |
+8 | use adw::prelude::*;
+  |     ^^^^^^^^^^^^
+
+warning: unused import: `GenericImageView`
+ --> src/filters/color.rs:1:33
+  |
+1 | use image::{DynamicImage, Rgba, GenericImageView, ImageBuffer};
+  |                                 ^^^^^^^^^^^^^^^^
+
+warning: unused import: `GenericImageView`
+ --> src/filters/artistic.rs:1:33
+  |
+1 | use image::{DynamicImage, Rgba, GenericImageView, ImageBuffer};
+  |                                 ^^^^^^^^^^^^^^^^
+
+warning: unused import: `gtk4::prelude`
+  --> src/ui/mod.rs:10:5
+   |
+10 | use gtk4::prelude::*;
+   |     ^^^^^^^^^^^^^
+
+warning: unused import: `GenericImageView`
+ --> src/filters/distort.rs:1:33
+  |
+1 | use image::{DynamicImage, Rgba, GenericImageView, ImageBuffer};
+  |                                 ^^^^^^^^^^^^^^^^
+
+warning: unused variable: `width`
+   --> src/core/layer.rs:421:45
+    |
+421 |     pub fn render(&self, context: &Context, width: u32, height: u32) {
+    |                                             ^^^^^ help: if this is intentional, prefix it with an underscore: `_width`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `height`
+   --> src/core/layer.rs:421:57
+    |
+421 |     pub fn render(&self, context: &Context, width: u32, height: u32) {
+    |                                                         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_height`
+
+warning: unused variable: `result_r`
+   --> src/core/layer.rs:458:10
+    |
+458 |     let (result_r, result_g, result_b) = match blend_mode {
+    |          ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_result_r`
+
+warning: unused variable: `result_g`
+   --> src/core/layer.rs:458:20
+    |
+458 |     let (result_r, result_g, result_b) = match blend_mode {
+    |                    ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_result_g`
+
+warning: unused variable: `result_b`
+   --> src/core/layer.rs:458:30
+    |
+458 |     let (result_r, result_g, result_b) = match blend_mode {
+    |                              ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_result_b`
+
+warning: unused variable: `vector_doc`
+   --> src/core/canvas.rs:215:21
+    |
+215 |         if let Some(vector_doc) = &mut self.vector_document {
+    |                     ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_vector_doc`
+
+warning: unused variable: `vector_doc`
+   --> src/core/canvas.rs:233:21
+    |
+233 |         if let Some(vector_doc) = &mut self.vector_document {
+    |                     ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_vector_doc`
+
+warning: unused variable: `document`
+   --> src/core/mod.rs:196:21
+    |
+196 |         if let Some(document) = &self.current_document {
+    |                     ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_document`
+
+warning: unused variable: `document`
+   --> src/core/mod.rs:206:21
+    |
+206 |         if let Some(document) = &mut self.current_document {
+    |                     ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_document`
+
+warning: variable does not need to be mutable
+   --> src/filters/mod.rs:152:9
+    |
+152 |     let mut result = ImageBuffer::new(width, height);
+    |         ----^^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` on by default
+
+warning: unused variable: `vector_doc`
+   --> src/tools/selection.rs:181:26
+    |
+181 |             if let (Some(vector_doc), Some(start), Some(end)) = (&canvas.vector_document, self.start_point, self.end_point) {
+    |                          ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_vector_doc`
+
+warning: unused variable: `canvas`
+   --> src/tools/brush.rs:176:54
+    |
+176 |     fn draw_preview(&self, context: &cairo::Context, canvas: &crate::core::Canvas) {
+    |                                                      ^^^^^^ help: if this is intentional, prefix it with an underscore: `_canvas`
+
+warning: unused variable: `canvas`
+   --> src/tools/clone.rs:248:54
+    |
+248 |     fn draw_preview(&self, context: &cairo::Context, canvas: &crate::core::Canvas) {
+    |                                                      ^^^^^^ help: if this is intentional, prefix it with an underscore: `_canvas`
+
+warning: unused variable: `x`
+   --> src/tools/heal.rs:109:28
+    |
+109 |     fn mouse_up(&mut self, x: f64, y: f64, button: u32) {
+    |                            ^ help: if this is intentional, prefix it with an underscore: `_x`
+
+warning: unused variable: `y`
+   --> src/tools/heal.rs:109:36
+    |
+109 |     fn mouse_up(&mut self, x: f64, y: f64, button: u32) {
+    |                                    ^ help: if this is intentional, prefix it with an underscore: `_y`
+
+warning: unused variable: `canvas`
+   --> src/tools/heal.rs:135:47
+    |
+135 |     fn draw_preview(&self, context: &Context, canvas: &Canvas) {
+    |                                               ^^^^^^ help: if this is intentional, prefix it with an underscore: `_canvas`
+
+warning: unused variable: `handle`
+   --> src/tools/crop.rs:125:32
+    |
+125 |             } else if let Some(handle) = self.handle_index {
+    |                                ^^^^^^ help: if this is intentional, prefix it with an underscore: `_handle`
+
+warning: unused variable: `x`
+   --> src/tools/crop.rs:178:28
+    |
+178 |     fn mouse_up(&mut self, x: f64, y: f64, button: u32) {
+    |                            ^ help: if this is intentional, prefix it with an underscore: `_x`
+
+warning: unused variable: `y`
+   --> src/tools/crop.rs:178:36
+    |
+178 |     fn mouse_up(&mut self, x: f64, y: f64, button: u32) {
+    |                                    ^ help: if this is intentional, prefix it with an underscore: `_y`
+
+warning: unused variable: `canvas`
+   --> src/tools/text.rs:193:54
+    |
+193 |     fn draw_preview(&self, context: &cairo::Context, canvas: &crate::core::Canvas) {
+    |                                                      ^^^^^^ help: if this is intentional, prefix it with an underscore: `_canvas`
+
+warning: unused variable: `canvas`
+   --> src/tools/gradient.rs:385:54
+    |
+385 |     fn draw_preview(&self, context: &cairo::Context, canvas: &Canvas) {
+    |                                                      ^^^^^^ help: if this is intentional, prefix it with an underscore: `_canvas`
+
+warning: unused variable: `shape_impl`
+  --> src/tools/vector_tools.rs:63:17
+   |
+63 |             let shape_impl = ShapeImpl::new_rectangle(
+   |                 ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_shape_impl`
+
+warning: unused variable: `canvas`
+   --> src/tools/mod.rs:137:20
+    |
+137 |     fn draw(&self, canvas: &Canvas, context: &cairo::Context) {}
+    |                    ^^^^^^ help: if this is intentional, prefix it with an underscore: `_canvas`
+
+warning: unused variable: `context`
+   --> src/tools/mod.rs:137:37
+    |
+137 |     fn draw(&self, canvas: &Canvas, context: &cairo::Context) {}
+    |                                     ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_context`
+
+warning: unused variable: `canvas`
+   --> src/tools/mod.rs:287:50
+    |
+287 |     pub fn mouse_move(&mut self, x: f64, y: f64, canvas: &mut Canvas) {
+    |                                                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_canvas`
+
+warning: unused variable: `entry_clone`
+   --> src/ui/settings.rs:370:13
+    |
+370 |         let entry_clone = location_entry.clone();
+    |             ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_entry_clone`
+
+warning: unused variable: `btn`
+   --> src/ui/settings.rs:470:40
+    |
+470 |         color1_button.connect_clicked(|btn| {
+    |                                        ^^^ help: if this is intentional, prefix it with an underscore: `_btn`
+
+warning: unused variable: `btn`
+   --> src/ui/settings.rs:475:40
+    |
+475 |         color2_button.connect_clicked(|btn| {
+    |                                        ^^^ help: if this is intentional, prefix it with an underscore: `_btn`
+
+warning: unused variable: `doc`
+   --> src/ui/main_window.rs:263:29
+    |
+263 |                         let doc = doc_clone.borrow();
+    |                             ^^^ help: if this is intentional, prefix it with an underscore: `_doc`
+
+warning: unused variable: `button_clone`
+   --> src/ui/tools_panel.rs:104:13
+    |
+104 |         let button_clone = button.clone();
+    |             ^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_button_clone`
+
+warning: unused variable: `i`
+   --> src/vector/mod.rs:585:9
+    |
+585 |     for i in 0..segments {
+    |         ^ help: if this is intentional, prefix it with an underscore: `_i`
+
+warning: variable does not need to be mutable
+   --> src/vector/mod.rs:579:9
+    |
+579 |     let mut t = Matrix::new(
+    |         ----^
+    |         |
+    |         help: remove this `mut`
+
+warning: value assigned to `x1` is never read
+   --> src/vector/mod.rs:644:13
+    |
+644 |     let mut x1 = 0.0;
+    |             ^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` on by default
+
+warning: value assigned to `y1` is never read
+   --> src/vector/mod.rs:645:13
+    |
+645 |     let mut y1 = 0.0;
+    |             ^^
+    |
+    = help: maybe it is overwritten before being read?
+
+warning: value assigned to `x2` is never read
+   --> src/vector/mod.rs:646:13
+    |
+646 |     let mut x2 = 0.0;
+    |             ^^
+    |
+    = help: maybe it is overwritten before being read?
+
+warning: value assigned to `y2` is never read
+   --> src/vector/mod.rs:647:13
+    |
+647 |     let mut y2 = 0.0;
+    |             ^^
+    |
+    = help: maybe it is overwritten before being read?
+
+warning: unused variable: `center`
+   --> src/vector/shape.rs:441:45
+    |
+441 |                     GradientType::Conical { center, angle: _ } => {
+    |                                             ^^^^^^ help: try ignoring the field: `center: _`
+
+warning: unused variable: `corner_radius`
+   --> src/vector/shape.rs:604:51
+    |
+604 |             ShapeType::Rectangle { width, height, corner_radius } => {
+    |                                                   ^^^^^^^^^^^^^ help: try ignoring the field: `corner_radius: _`
+
+warning: unused variable: `angle`
+   --> src/vector/shape.rs:739:56
+    |
+739 |                     GradientType::Conical { center: _, angle } => {
+    |                                                        ^^^^^ help: try ignoring the field: `angle: _`
+
+warning: unused variable: `angle`
+   --> src/vector/shape.rs:907:56
+    |
+907 |                     GradientType::Conical { center: _, angle } => {
+    |                                                        ^^^^^ help: try ignoring the field: `angle: _`
+
+warning: unused variable: `path`
+   --> src/vector/document.rs:380:33
+    |
+380 |     pub fn export_as_svg(&self, path: &str) -> Result<(), String> {
+    |                                 ^^^^ help: if this is intentional, prefix it with an underscore: `_path`
+
+warning: unused variable: `path`
+  --> src/raw.rs:21:29
+   |
+21 |     pub fn load_file(&self, path: &Path) -> Result<RawImage, String> {
+   |                             ^^^^ help: if this is intentional, prefix it with an underscore: `_path`
+
+warning: unused variable: `params`
+  --> src/raw.rs:30:51
+   |
+30 |     pub fn process_image(&self, image: &RawImage, params: &RawProcessingParams) -> DynamicImage {
+   |                                                   ^^^^^^ help: if this is intentional, prefix it with an underscore: `_params`
+
+Some errors have detailed explanations: E0407, E0412, E0425, E0432, E0433, E0603.
+For more information about an error, try `rustc --explain E0407`.
+warning: `rust_photo` (lib) generated 169 warnings
+error: could not compile `rust_photo` (lib) due to 45 previous errors; 169 warnings emitted

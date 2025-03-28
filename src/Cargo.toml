@@ -1,0 +1,78 @@
+[package]
+name = "rust_photo"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A feature-rich image editor alternative to Affinity Photo"
+
+[dependencies]
+# GUI Framework
+gtk = { version = "0.7", features = ["v4_8"] }
+gdk = { version = "0.7", features = ["v4_8"] }
+gdk-pixbuf = "0.18"
+libadwaita = { version = "0.5", features = ["v1_4"] }
+gtk4-layer-shell = "0.1"
+
+# Image Processing
+image = "0.24"
+imageproc = "0.23"
+ndarray = { version = "0.15", features = ["rayon"] }
+ndarray-image = "0.3"
+
+# GPU Acceleration
+cuda-runtime-sys = { version = "0.3", optional = true }
+rocm-runtime-sys = { version = "0.5", optional = true }
+ocl = "0.19"  # OpenCL support for fallback
+gpu-array = "0.1"
+
+# Vector Graphics
+cairo-rs = { version = "0.18", features = ["png", "pdf", "svg"] }
+pango = { version = "0.18", features = ["v1_46"] }
+rsvg = "0.18"
+
+# Color Management
+lcms2 = "6.0"
+color-eyre = "0.6"
+
+# UI Components
+sourceview5 = "0.7"
+gstreamer = { version = "0.21", features = ["v1_20"] }
+gstreamer-video = "0.21"
+
+# Performance & Parallel Processing
+rayon = "1.8"
+crossbeam = "0.8"
+parking_lot = "0.12"
+num_cpus = "1.16"
+
+# Error Handling & Logging
+anyhow = "1.0"
+thiserror = "1.0"
+log = "0.4"
+env_logger = "0.10"
+tracing = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[dev-dependencies]
+criterion = "0.5"
+test-log = "0.2"
+
+[build-dependencies]
+pkg-config = "0.3"
+
+[features]
+default = ["opencl"]
+gpu-cuda = ["cuda-runtime-sys"]
+gpu-rocm = ["rocm-runtime-sys"]
+opencl = []
+
+[[bin]]
+name = "rust_photo"
+path = "src/main.rs"
+
+[lib]
+name = "rust_photo"
+path = "src/lib.rs" 

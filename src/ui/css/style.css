@@ -1,0 +1,223 @@
+/* Main application styles */
+
+/* Dark theme */
+window {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+}
+
+headerbar {
+    background-color: #353535;
+    color: #e0e0e0;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+button {
+    background-color: #404040;
+    color: #e0e0e0;
+    border: 1px solid #505050;
+    border-radius: 4px;
+    padding: 6px 12px;
+}
+
+button:hover {
+    background-color: #505050;
+}
+
+button:active {
+    background-color: #606060;
+}
+
+.sidebar {
+    background-color: #353535;
+    border-right: 1px solid #1a1a1a;
+}
+
+.tool-button {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 6px;
+    margin: 3px;
+    border-radius: 4px;
+}
+
+.tool-button:hover {
+    background-color: #505050;
+}
+
+.tool-button.selected {
+    background-color: #0066cc;
+}
+
+.canvas-area {
+    background-color: #232323;
+}
+
+.panel {
+    background-color: #353535;
+    border-left: 1px solid #1a1a1a;
+}
+
+.status-bar {
+    background-color: #353535;
+    border-top: 1px solid #1a1a1a;
+    padding: 4px 8px;
+    font-size: 0.9em;
+}
+
+/* Settings dialog styles */
+.settings-sidebar {
+    background-color: #333333;
+    border-right: 1px solid #1a1a1a;
+}
+
+.settings-sidebar row {
+    padding: 8px 12px;
+}
+
+.settings-sidebar row:selected {
+    background-color: #0066cc;
+    color: white;
+}
+
+.settings-content {
+    background-color: #2d2d2d;
+    padding: 24px;
+}
+
+.settings-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 16px;
+}
+
+frame {
+    border: 1px solid #505050;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 8px 0;
+}
+
+frame > label:first-child {
+    color: #a0a0a0;
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.caption {
+    font-size: 0.9em;
+    color: #a0a0a0;
+    font-style: italic;
+}
+
+entry {
+    background-color: #404040;
+    color: #e0e0e0;
+    border: 1px solid #505050;
+    border-radius: 4px;
+    padding: 6px;
+}
+
+comboboxtext {
+    background-color: #404040;
+    color: #e0e0e0;
+    border: 1px solid #505050;
+    border-radius: 4px;
+}
+
+spinbutton {
+    background-color: #404040;
+    color: #e0e0e0;
+    border: 1px solid #505050;
+    border-radius: 4px;
+}
+
+scale {
+    margin: 6px 0;
+}
+
+scale trough {
+    background-color: #404040;
+    border: 1px solid #505050;
+    border-radius: 4px;
+    min-height: 6px;
+}
+
+scale highlight {
+    background-color: #0066cc;
+    border-radius: 3px;
+}
+
+checkbutton {
+    margin: 4px 0;
+}
+
+checkbutton check {
+    background-color: #404040;
+    border: 1px solid #505050;
+    border-radius: 3px;
+}
+
+checkbutton:checked check {
+    background-color: #0066cc;
+}
+
+.title-3 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+/* Dark/Light toggle button styles */
+togglebutton {
+    background-color: #404040;
+    color: #e0e0e0;
+    border: 1px solid #505050;
+    border-radius: 0;
+    padding: 6px 12px;
+}
+
+togglebutton:first-child {
+    border-radius: 4px 0 0 4px;
+}
+
+togglebutton:last-child {
+    border-radius: 0 4px 4px 0;
+}
+
+togglebutton:hover {
+    background-color: #505050;
+}
+
+togglebutton:checked {
+    background-color: #0066cc;
+    color: white;
+}
+
+/* Search entry in settings */
+searchentry {
+    background-color: #404040;
+    color: #e0e0e0;
+    border: 1px solid #505050;
+    border-radius: 4px;
+    padding: 6px;
+}
+
+notebook {
+    background-color: #353535;
+}
+
+notebook tab {
+    background-color: #404040;
+    padding: 6px 12px;
+    border-radius: 4px 4px 0 0;
+}
+
+notebook tab:checked {
+    background-color: #505050;
+}
+
+notebook tab label {
+    color: #e0e0e0;
+} 
