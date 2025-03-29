@@ -5,6 +5,7 @@ use uuid::Uuid;
 use image::{DynamicImage, GenericImageView, ImageBuffer, Rgba};
 use crate::core::layer::{Layer, LayerManager};
 use std::collections::HashMap;
+use log::{debug, error, info, warn};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ColorSpace {
@@ -156,6 +157,7 @@ pub struct Document {
 impl Document {
     /// Create a new document with the given dimensions
     pub fn new(width: u32, height: u32) -> Self {
+        info!("Creating new document with dimensions {}x{}", width, height);
         let mut layer_manager = LayerManager::new();
         
         // Add a background layer
@@ -176,8 +178,11 @@ impl Document {
     
     /// Create a document from an existing image
     pub fn from_image(image: DynamicImage, path: Option<PathBuf>) -> Self {
+        info!("Creating document from image");
         let width = image.width();
         let height = image.height();
+        
+        debug!("Image dimensions: {}x{}", width, height);
         
         let mut layer_manager = LayerManager::new();
         
@@ -221,6 +226,8 @@ impl Document {
         let mut metadata = DocumentMetadata::default();
         metadata.title = title;
         
+        info!("Document created successfully from image");
+        
         Self {
             path,
             format,
@@ -236,20 +243,25 @@ impl Document {
     /// Create a document from a file
     pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self, String> {
         let path = path.as_ref();
+        info!("Opening document from path: {:?}", path);
         
         // Load the image
-        let image = match image::open(path) {
-            Ok(img) => img,
-            Err(err) => return Err(format!("Failed to open image: {}", err)),
-        };
-        
-        // Create a document from the image
-        Ok(Self::from_image(image, Some(path.to_path_buf())))
+        match image::open(path) {
+            Ok(img) => {
+                info!("Image loaded successfully");
+                Ok(Self::from_image(img, Some(path.to_path_buf())))
+            },
+            Err(err) => {
+                error!("Failed to open image: {}", err);
+                Err(format!("Failed to open image: {}", err))
+            }
+        }
     }
     
     /// Save the document to a file
     pub fn save<P: AsRef<Path>>(&mut self, path: P) -> Result<(), String> {
         let path = path.as_ref();
+        info!("Saving document to path: {:?}", path);
         
         // Determine format from path
         let format = if let Some(extension) = path.extension() {
@@ -271,27 +283,35 @@ impl Document {
         // Save the image
         match format {
             DocumentFormat::JPEG => {
+                info!("Saving as JPEG");
                 if let Err(err) = dynamic_image.save_with_format(path, image::ImageFormat::Jpeg) {
+                    error!("Failed to save as JPEG: {}", err);
                     return Err(format!("Failed to save as JPEG: {}", err));
                 }
             }
             DocumentFormat::PNG => {
+                info!("Saving as PNG");
                 if let Err(err) = dynamic_image.save_with_format(path, image::ImageFormat::Png) {
+                    error!("Failed to save as PNG: {}", err);
                     return Err(format!("Failed to save as PNG: {}", err));
                 }
             }
             DocumentFormat::TIFF => {
+                info!("Saving as TIFF");
                 if let Err(err) = dynamic_image.save_with_format(path, image::ImageFormat::Tiff) {
+                    error!("Failed to save as TIFF: {}", err);
                     return Err(format!("Failed to save as TIFF: {}", err));
                 }
             }
             DocumentFormat::WebP => {
+                info!("Saving as WebP");
                 if let Err(err) = dynamic_image.save_with_format(path, image::ImageFormat::WebP) {
+                    error!("Failed to save as WebP: {}", err);
                     return Err(format!("Failed to save as WebP: {}", err));
                 }
             }
             DocumentFormat::AffinityPhoto | DocumentFormat::Native => {
-                // Not implemented yet
+                error!("Native format saving not implemented");
                 return Err("Saving in native format not yet implemented".to_string());
             }
         }
@@ -303,6 +323,7 @@ impl Document {
         // Update metadata
         self.metadata.modification_time = SystemTime::now();
         
+        info!("Document saved successfully");
         Ok(())
     }
     
@@ -340,5 +361,11 @@ impl Document {
     /// Open a document from a file path
     pub fn open<P: AsRef<Path>>(path: P) -> Result<Self, String> {
         Self::from_file(path)
+    }
+    
+    /// Get the image data for the document
+    pub fn get_image(&self) -> Option<ImageBuffer<Rgba<u8>, Vec<u8>>> {
+        debug!("Getting document image");
+        Some(self.layer_manager.flatten())
     }
 } 

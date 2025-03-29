@@ -25,42 +25,51 @@ use crate::vector::{VectorDocument, Point};
 
 // CSS styles for the application
 const APP_CSS: &str = "
+    window {
+        background-color: #1a1a1a;
+        color: #e0e0e0;
+    }
+
     .toolbar {
-        background-color: #2d2d2d;
-        border-right: 1px solid rgba(0,0,0,0.3);
+        background-color: #242424;
+        border-right: 1px solid rgba(255,255,255,0.05);
         padding: 8px;
     }
 
     .tool-button {
         padding: 12px;
         margin: 4px;
-        border-radius: 6px;
+        border-radius: 8px;
         color: #e0e0e0;
-        background-color: rgba(255,255,255,0.05);
-        min-width: 24px;
-        min-height: 24px;
+        background-color: #2d2d2d;
+        min-width: 32px;
+        min-height: 32px;
+        transition: all 200ms ease;
     }
 
     .tool-button:hover {
-        background-color: rgba(255,255,255,0.1);
+        background-color: #353535;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
     .tool-button:active,
     .tool-button.active {
         background-color: @accent_bg_color;
         color: @accent_fg_color;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
 
     .sidebar {
-        background-color: #2d2d2d;
-        border-left: 1px solid rgba(0,0,0,0.3);
+        background-color: #242424;
+        border-left: 1px solid rgba(255,255,255,0.05);
         padding: 8px;
     }
 
     .sidebar tab-box {
         padding: 8px;
-        background-color: #232323;
-        border-bottom: 1px solid rgba(0,0,0,0.3);
+        background-color: #2d2d2d;
+        border-radius: 8px;
+        margin-bottom: 8px;
     }
 
     .sidebar button {
@@ -68,6 +77,13 @@ const APP_CSS: &str = "
         margin: 2px;
         border-radius: 6px;
         color: #e0e0e0;
+        background-color: #2d2d2d;
+        border: none;
+        box-shadow: none;
+    }
+
+    .sidebar button:hover {
+        background-color: #353535;
     }
 
     .sidebar button.active {
@@ -77,6 +93,8 @@ const APP_CSS: &str = "
 
     .canvas-area {
         background-color: #1e1e1e;
+        border-radius: 8px;
+        margin: 8px;
     }
 
     .canvas-area .placeholder {
@@ -85,21 +103,25 @@ const APP_CSS: &str = "
     }
 
     headerbar {
-        background-color: #1d1d1d;
-        border-bottom: 1px solid rgba(0,0,0,0.3);
+        background-color: #242424;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
         padding: 8px;
+        min-height: 48px;
     }
 
     headerbar button {
-        padding: 8px 12px;
+        padding: 8px 16px;
         margin: 2px;
         border-radius: 6px;
         color: #e0e0e0;
-        background-color: rgba(255,255,255,0.05);
+        background-color: #2d2d2d;
+        border: none;
+        box-shadow: none;
+        min-height: 32px;
     }
 
     headerbar button:hover {
-        background-color: rgba(255,255,255,0.1);
+        background-color: #353535;
     }
 
     scale {
@@ -107,7 +129,7 @@ const APP_CSS: &str = "
     }
 
     scale trough {
-        background-color: rgba(255,255,255,0.1);
+        background-color: #2d2d2d;
         border-radius: 4px;
         min-height: 6px;
     }
@@ -118,15 +140,44 @@ const APP_CSS: &str = "
     }
 
     combobox button {
-        background-color: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
+        background-color: #2d2d2d;
+        border: 1px solid rgba(255,255,255,0.05);
         border-radius: 6px;
-        padding: 6px;
+        padding: 8px;
         color: #e0e0e0;
+        min-height: 32px;
     }
 
     combobox button:hover {
-        background-color: rgba(255,255,255,0.1);
+        background-color: #353535;
+    }
+
+    treeview {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+        border-radius: 6px;
+    }
+
+    treeview:selected {
+        background-color: @accent_bg_color;
+        color: @accent_fg_color;
+    }
+
+    scrolledwindow {
+        border-radius: 6px;
+    }
+
+    entry {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 6px;
+        padding: 8px;
+        min-height: 32px;
+    }
+
+    entry:focus {
+        border-color: @accent_bg_color;
     }
 ";
 

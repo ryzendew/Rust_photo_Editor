@@ -1,7 +1,11 @@
-use image::{ImageBuffer, Rgba};
-use cairo::Context;
+use image::{DynamicImage, ImageBuffer, Rgba};
+use cairo::{Context, Format, ImageSurface};
 use uuid::Uuid;
 use std::collections::HashMap;
+use std::cell::RefCell;
+use std::rc::Rc;
+use log::{debug, info, warn, error};
+use crate::core::document::Document;
 
 /// Represents a layer in the image
 #[derive(Clone, Debug, PartialEq)]
@@ -10,10 +14,12 @@ pub struct Layer {
     pub name: String,
     pub image: ImageBuffer<Rgba<u8>, Vec<u8>>,
     pub visible: bool,
-    pub opacity: f32,
+    pub opacity: f64,
     pub blend_mode: BlendMode,
     pub x_offset: i32,
     pub y_offset: i32,
+    pub width: u32,
+    pub height: u32,
 }
 
 /// Layer blend modes for compositing
@@ -40,6 +46,7 @@ pub enum BlendMode {
 impl Layer {
     /// Create a new empty layer with the given dimensions
     pub fn new(width: u32, height: u32, name: String) -> Self {
+        info!("Creating new layer: {} ({}x{})", name, width, height);
         Self {
             id: Uuid::new_v4().to_string(),
             name,
@@ -49,11 +56,18 @@ impl Layer {
             blend_mode: BlendMode::Normal,
             x_offset: 0,
             y_offset: 0,
+            width,
+            height,
         }
     }
     
     /// Create a layer from an existing image
     pub fn from_image(image: ImageBuffer<Rgba<u8>, Vec<u8>>, name: String) -> Self {
+        info!("Creating layer from image: {}", name);
+        let width = image.width();
+        let height = image.height();
+        debug!("Layer dimensions: {}x{}", width, height);
+        
         Self {
             id: Uuid::new_v4().to_string(),
             name,
@@ -63,6 +77,20 @@ impl Layer {
             blend_mode: BlendMode::Normal,
             x_offset: 0,
             y_offset: 0,
+            width,
+            height,
+        }
+    }
+    
+    /// Create a layer from a document
+    pub fn from_document(doc: &Document) -> Self {
+        info!("Creating layer from document");
+        if let Some(image) = doc.get_image() {
+            debug!("Got image from document");
+            Self::from_image(image, "Background".to_string())
+        } else {
+            warn!("No image in document, creating empty layer");
+            Self::new(doc.width, doc.height, "Background".to_string())
         }
     }
     
@@ -77,6 +105,8 @@ impl Layer {
             blend_mode: self.blend_mode,
             x_offset: self.x_offset,
             y_offset: self.y_offset,
+            width: self.width,
+            height: self.height,
         }
     }
     
@@ -146,7 +176,7 @@ impl Layer {
     }
     
     /// Set the opacity of the layer
-    pub fn set_opacity(&mut self, opacity: f32) {
+    pub fn set_opacity(&mut self, opacity: f64) {
         self.opacity = opacity.max(0.0).min(1.0);
     }
     
@@ -167,73 +197,54 @@ impl Layer {
     }
     
     /// Render the layer to a Cairo context
-    pub fn render(&self, context: &Context, _width: u32, _height: u32) {
-        if !self.visible || self.opacity <= 0.0 {
+    pub fn render(&self, cr: &Context, width: u32, height: u32) {
+        if !self.visible {
+            debug!("Layer {} is not visible, skipping render", self.name);
             return;
         }
         
-        let width = self.image.width();
-        let height = self.image.height();
+        debug!("Rendering layer: {}", self.name);
         
-        if width == 0 || height == 0 {
-            return;
-        }
-        
-        // Create a Cairo surface from the image data
-        let stride = width as i32 * 4;
-        let mut data = Vec::with_capacity((width * height * 4) as usize);
-        
-        for y in 0..height {
-            for x in 0..width {
-                let pixel = self.image.get_pixel(x, y);
-                data.push(pixel[2]); // B
-                data.push(pixel[1]); // G
-                data.push(pixel[0]); // R
-                data.push(pixel[3]); // A
+        // Create a surface from the image data
+        let data = self.image.as_raw().to_vec();
+        let stride = cairo::Format::Rgb24.stride_for_width(self.width as u32)
+            .expect("Failed to calculate stride");
+            
+        unsafe {
+            if let Ok(surface) = ImageSurface::create_for_data(
+                data,
+                Format::Rgb24,
+                self.width as i32,
+                self.height as i32,
+                stride
+            ) {
+                // Save the current state
+                cr.save().expect("Failed to save context state");
+                
+                // Set the opacity
+                if self.opacity < 1.0 {
+                    cr.push_group();
+                }
+                
+                // Draw the image
+                cr.set_source_surface(&surface, 0.0, 0.0)
+                    .expect("Failed to set source surface");
+                cr.paint().expect("Failed to paint surface");
+                
+                // Apply opacity if needed
+                if self.opacity < 1.0 {
+                    cr.pop_group_to_source().expect("Failed to pop group");
+                    cr.paint_with_alpha(self.opacity as f64).expect("Failed to paint with alpha");
+                }
+                
+                // Restore the state
+                cr.restore().expect("Failed to restore context state");
+                
+                debug!("Layer {} rendered successfully", self.name);
+            } else {
+                error!("Failed to create surface for layer {}", self.name);
             }
         }
-        
-        let surface = cairo::ImageSurface::create_for_data(
-            data,
-            cairo::Format::ARgb32,
-            width as i32,
-            height as i32,
-            stride
-        ).unwrap();
-        
-        // Draw the surface to the context
-        context.save();
-        
-        // Apply opacity
-        context.set_operator(cairo::Operator::Over);
-        context.translate(self.x_offset as f64, self.y_offset as f64);
-        
-        // Apply blend mode
-        match self.blend_mode {
-            BlendMode::Normal => context.set_operator(cairo::Operator::Over),
-            BlendMode::Multiply => context.set_operator(cairo::Operator::Multiply),
-            BlendMode::Screen => context.set_operator(cairo::Operator::Screen),
-            BlendMode::Overlay => context.set_operator(cairo::Operator::Overlay),
-            BlendMode::Darken => context.set_operator(cairo::Operator::Darken),
-            BlendMode::Lighten => context.set_operator(cairo::Operator::Lighten),
-            BlendMode::ColorDodge => context.set_operator(cairo::Operator::ColorDodge),
-            BlendMode::ColorBurn => context.set_operator(cairo::Operator::ColorBurn),
-            BlendMode::HardLight => context.set_operator(cairo::Operator::HardLight),
-            BlendMode::SoftLight => context.set_operator(cairo::Operator::SoftLight),
-            BlendMode::Difference => context.set_operator(cairo::Operator::Difference),
-            BlendMode::Exclusion => context.set_operator(cairo::Operator::Exclusion),
-            _ => context.set_operator(cairo::Operator::Over), // Fallback for unsupported blend modes
-        }
-        
-        context.set_source_surface(&surface, 0.0, 0.0);
-        
-        if self.opacity < 1.0 {
-            context.paint_with_alpha(self.opacity as f64);
-        } else {
-            context.paint();
-        }
-        
-        context.restore();
     }
 }
 
@@ -247,6 +258,7 @@ pub struct LayerManager {
 impl LayerManager {
     /// Create a new layer manager
     pub fn new() -> Self {
+        info!("Creating new layer manager");
         Self {
             layers: Vec::new(),
             active_layer_index: 0,
@@ -255,6 +267,7 @@ impl LayerManager {
     
     /// Add a new layer
     pub fn add_layer(&mut self, layer: Layer) -> usize {
+        info!("Adding layer: {}", layer.name);
         self.layers.push(layer);
         let index = self.layers.len() - 1;
         self.active_layer_index = index;
@@ -365,55 +378,40 @@ impl LayerManager {
     
     /// Merge the visible layers into a single image
     pub fn flatten(&self) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
-        // Find the dimensions of the resulting image
-        let mut max_width = 0;
-        let mut max_height = 0;
-        
-        for layer in &self.layers {
-            let right = layer.image.width() as i32 + layer.x_offset;
-            let bottom = layer.image.height() as i32 + layer.y_offset;
-            
-            max_width = max_width.max(right as u32);
-            max_height = max_height.max(bottom as u32);
+        debug!("Flattening layers");
+        if self.layers.is_empty() {
+            error!("No layers to flatten");
+            return ImageBuffer::new(1, 1);
         }
         
-        // Create the output image
-        let mut result = ImageBuffer::new(max_width, max_height);
+        // Use the first layer's dimensions
+        let width = self.layers[0].width;
+        let height = self.layers[0].height;
+        debug!("Creating flattened image with dimensions {}x{}", width, height);
         
-        // Composite layers bottom to top
+        let mut result = ImageBuffer::new(width, height);
+        
+        // Composite all visible layers
         for layer in &self.layers {
-            if !layer.visible || layer.opacity <= 0.0 {
-                continue;
-            }
-            
-            // Get the dimensions of this layer
-            let layer_width = layer.image.width();
-            let layer_height = layer.image.height();
-            
-            // Calculate the area to composite
-            let start_x = layer.x_offset.max(0) as u32;
-            let start_y = layer.y_offset.max(0) as u32;
-            let end_x = (layer.x_offset as u32 + layer_width).min(max_width);
-            let end_y = (layer.y_offset as u32 + layer_height).min(max_height);
-            
-            // Composite the layer
-            for y in start_y..end_y {
-                for x in start_x..end_x {
-                    let layer_x = x as i32 - layer.x_offset;
-                    let layer_y = y as i32 - layer.y_offset;
-                    
-                    if layer_x >= 0 && layer_y >= 0 && layer_x < layer_width as i32 && layer_y < layer_height as i32 {
-                        let src_pixel = layer.image.get_pixel(layer_x as u32, layer_y as u32);
-                        let dst_pixel = result.get_pixel(x, y);
-                        
-                        // Apply blend mode and opacity
-                        let blended = blend_pixels(dst_pixel, src_pixel, layer.blend_mode, layer.opacity);
-                        result.put_pixel(x, y, blended);
+            if layer.visible {
+                debug!("Compositing layer: {}", layer.name);
+                for (x, y, pixel) in result.enumerate_pixels_mut() {
+                    if x < layer.width && y < layer.height {
+                        let src_pixel = layer.image.get_pixel(x, y);
+                        // Simple alpha compositing
+                        let alpha = (src_pixel[3] as f64 * layer.opacity) as u8;
+                        *pixel = Rgba([
+                            src_pixel[0],
+                            src_pixel[1],
+                            src_pixel[2],
+                            alpha,
+                        ]);
                     }
                 }
             }
         }
         
+        debug!("Layers flattened successfully");
         result
     }
     
