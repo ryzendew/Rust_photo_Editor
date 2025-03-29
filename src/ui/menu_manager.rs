@@ -1,8 +1,8 @@
-use gtk::prelude::*;
-use gtk::{gio, MenuButton, PopoverMenu};
-use std::rc::Rc;
+use gtk4::prelude::*;
+use gtk4::{gio, MenuButton, PopoverMenu};
 use std::cell::RefCell;
-use crate::ui::show_settings_dialog;
+use std::rc::Rc;
+use crate::ui::MainWindow;
 
 /// Creates all menus for the application
 pub struct MenuManager {
@@ -18,6 +18,8 @@ pub struct MenuManager {
     window_menu: gio::Menu,
     help_menu: gio::Menu,
     actions: gio::SimpleActionGroup,
+    menu_bar: gio::MenuModel,
+    callbacks: RefCell<Vec<Box<dyn Fn(&gtk4::Window) + 'static>>>,
 }
 
 impl MenuManager {
@@ -35,6 +37,22 @@ impl MenuManager {
         let help_menu = gio::Menu::new();
         let actions = gio::SimpleActionGroup::new();
 
+        // Create the menu bar
+        let menu_bar = gio::Menu::new();
+        
+        // Create submenus
+        menu_bar.append_submenu(Some("File"), &file_menu);
+        menu_bar.append_submenu(Some("Edit"), &edit_menu);
+        menu_bar.append_submenu(Some("Text"), &text_menu);
+        menu_bar.append_submenu(Some("Document"), &document_menu);
+        menu_bar.append_submenu(Some("Layer"), &layer_menu);
+        menu_bar.append_submenu(Some("Select"), &select_menu);
+        menu_bar.append_submenu(Some("Arrange"), &arrange_menu);
+        menu_bar.append_submenu(Some("Filters"), &filters_menu);
+        menu_bar.append_submenu(Some("View"), &view_menu);
+        menu_bar.append_submenu(Some("Window"), &window_menu);
+        menu_bar.append_submenu(Some("Help"), &help_menu);
+
         let mut menu_manager = Self {
             file_menu,
             edit_menu,
@@ -48,6 +66,8 @@ impl MenuManager {
             window_menu,
             help_menu,
             actions,
+            menu_bar: menu_bar.upcast(),
+            callbacks: RefCell::new(Vec::new()),
         };
 
         menu_manager.build_file_menu();
@@ -65,103 +85,68 @@ impl MenuManager {
         menu_manager
     }
 
-    pub fn get_menu_bar(&self) -> gio::Menu {
-        let menu_bar = gio::Menu::new();
-        
-        menu_bar.append_submenu(Some("File"), &self.file_menu);
-        menu_bar.append_submenu(Some("Edit"), &self.edit_menu);
-        menu_bar.append_submenu(Some("Text"), &self.text_menu);
-        menu_bar.append_submenu(Some("Document"), &self.document_menu);
-        menu_bar.append_submenu(Some("Layer"), &self.layer_menu);
-        menu_bar.append_submenu(Some("Select"), &self.select_menu);
-        menu_bar.append_submenu(Some("Arrange"), &self.arrange_menu);
-        menu_bar.append_submenu(Some("Filters"), &self.filters_menu);
-        menu_bar.append_submenu(Some("View"), &self.view_menu);
-        menu_bar.append_submenu(Some("Window"), &self.window_menu);
-        menu_bar.append_submenu(Some("Help"), &self.help_menu);
-        
-        menu_bar
+    pub fn get_menu_bar(&self) -> gio::MenuModel {
+        self.menu_bar.clone()
     }
 
     pub fn get_actions(&self) -> &gio::SimpleActionGroup {
         &self.actions
     }
 
+    pub fn add_callback<F>(&self, callback: F)
+    where
+        F: Fn(&gtk4::Window) + 'static,
+    {
+        self.callbacks.borrow_mut().push(Box::new(callback));
+    }
+
+    pub fn trigger_callback(&self, index: usize) {
+        if let Some(callback) = self.callbacks.borrow().get(index) {
+            callback(&gtk4::Window::new());
+        }
+    }
+
     fn build_file_menu(&mut self) {
         // File menu section - New
         let new_section = gio::Menu::new();
-        new_section.append(Some("New..."), Some("app.new"));
-        
-        let new_from_clipboard = gio::Menu::new();
-        new_from_clipboard.append(Some("New from Clipboard"), Some("app.new_from_clipboard"));
-        new_section.append_submenu(None, &new_from_clipboard);
-        
-        let new_from_link_format = gio::Menu::new();
-        new_from_link_format.append(Some("New from Link Format"), Some("app.new_from_link_format"));
-        new_section.append_submenu(None, &new_from_link_format);
-        
+        new_section.append(Some("New"), Some("app.new"));
+        new_section.append(Some("New from Clipboard"), Some("app.new_from_clipboard"));
         self.file_menu.append_section(None, &new_section);
 
-        // File menu section - Open 
+        // File menu section - Open
         let open_section = gio::Menu::new();
         open_section.append(Some("Open..."), Some("app.open"));
-        
-        let open_recent = gio::Menu::new();
-        open_recent.append(Some("Open Recent"), Some("app.open_recent"));
-        open_section.append_submenu(None, &open_recent);
-        
+        open_section.append(Some("Open Recent"), Some("app.open_recent"));
         self.file_menu.append_section(None, &open_section);
 
         // File menu section - Save
         let save_section = gio::Menu::new();
         save_section.append(Some("Save"), Some("app.save"));
         save_section.append(Some("Save As..."), Some("app.save_as"));
-        save_section.append(Some("Save History with Document"), Some("app.save_history"));
         self.file_menu.append_section(None, &save_section);
 
         // File menu section - Export
         let export_section = gio::Menu::new();
         export_section.append(Some("Export..."), Some("app.export"));
-        
-        let export_list = gio::Menu::new();
-        export_list.append(Some("Export List..."), Some("app.export_list"));
-        export_section.append_submenu(None, &export_list);
-        
-        let export_template = gio::Menu::new();
-        export_template.append(Some("Export as Template..."), Some("app.export_template"));
-        export_section.append_submenu(None, &export_template);
-        
+        export_section.append(Some("Export As..."), Some("app.export_as"));
         self.file_menu.append_section(None, &export_section);
-
-        // File menu section - Import
-        let import_section = gio::Menu::new();
-        
-        let import_icc = gio::Menu::new();
-        import_icc.append(Some("Import ICC Profile..."), Some("app.import_icc"));
-        import_section.append_submenu(None, &import_icc);
-        
-        let import_content = gio::Menu::new();
-        import_content.append(Some("Import Content..."), Some("app.import_content"));
-        import_section.append_submenu(None, &import_content);
-        
-        self.file_menu.append_section(None, &import_section);
 
         // File menu section - End
         let end_section = gio::Menu::new();
-        end_section.append(Some("Print..."), Some("app.print"));
-        end_section.append(Some("Exit"), Some("app.exit"));
+        end_section.append(Some("Close"), Some("app.close"));
+        end_section.append(Some("Quit"), Some("app.quit"));
         self.file_menu.append_section(None, &end_section);
-        
+
         // Add actions
-        self.add_simple_action("new", |window| {
+        self.add_simple_action("new", |_| {
             println!("New document");
         });
         
-        self.add_simple_action("open", |window| {
+        self.add_simple_action("open", |_| {
             println!("Open document");
         });
         
-        self.add_simple_action("save", |window| {
+        self.add_simple_action("save", |_| {
             println!("Save document");
         });
     }
@@ -178,48 +163,25 @@ impl MenuManager {
         clipboard_section.append(Some("Cut"), Some("app.cut"));
         clipboard_section.append(Some("Copy"), Some("app.copy"));
         clipboard_section.append(Some("Paste"), Some("app.paste"));
-        clipboard_section.append(Some("Paste Inside"), Some("app.paste_inside"));
         clipboard_section.append(Some("Delete"), Some("app.delete"));
         self.edit_menu.append_section(None, &clipboard_section);
 
-        // Edit - Defaults
-        let defaults_section = gio::Menu::new();
-        
-        let defaults_submenu = gio::Menu::new();
-        defaults_submenu.append(Some("Defaults..."), Some("app.defaults"));
-        defaults_section.append_submenu(None, &defaults_submenu);
-        
-        let custom_submenu = gio::Menu::new();
-        custom_submenu.append(Some("Custom Styles..."), Some("app.custom_styles"));
-        defaults_section.append_submenu(None, &custom_submenu);
-        
-        defaults_section.append(Some("Settings..."), Some("app.settings"));
-        self.edit_menu.append_section(None, &defaults_section);
+        // Edit - Preferences
+        let preferences_section = gio::Menu::new();
+        preferences_section.append(Some("Preferences..."), Some("app.preferences"));
+        self.edit_menu.append_section(None, &preferences_section);
         
         // Add actions
-        self.add_simple_action("undo", |window| {
+        self.add_simple_action("undo", |_| {
             println!("Undo");
         });
         
-        self.add_simple_action("redo", |window| {
+        self.add_simple_action("redo", |_| {
             println!("Redo");
         });
         
-        self.add_simple_action("cut", |window| {
-            println!("Cut");
-        });
-        
-        self.add_simple_action("copy", |window| {
-            println!("Copy");
-        });
-        
-        self.add_simple_action("paste", |window| {
-            println!("Paste");
-        });
-        
-        self.add_simple_action("settings", |window| {
-            println!("Opening settings dialog");
-            show_settings_dialog(window);
+        self.add_simple_action("preferences", |window| {
+            println!("Opening preferences dialog");
         });
     }
 
@@ -541,14 +503,14 @@ impl MenuManager {
 
     fn add_simple_action<F>(&mut self, name: &str, callback: F)
     where
-        F: Fn(&gtk::Window) + 'static,
+        F: Fn(&gtk4::Window) + 'static,
     {
         let action = gio::SimpleAction::new(name, None);
         let callback = Rc::new(RefCell::new(callback));
         
         action.connect_activate(move |_, _| {
             // In a real app, we'd pass the actual window
-            callback.borrow()(&gtk::Window::new());
+            callback.borrow()(&gtk4::Window::new());
         });
         
         self.actions.add_action(&action);

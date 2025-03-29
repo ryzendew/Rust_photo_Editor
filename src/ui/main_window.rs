@@ -1,210 +1,146 @@
-use gtk4::prelude::*;
 use gtk4::{
-    Application, ApplicationWindow, Box as GtkBox, Button, DrawingArea, FileChooserAction,
-    FileChooserDialog, HeaderBar, Label, Notebook, Overlay, ResponseType, ScrolledWindow,
-    Stack, StackSwitcher, ToggleButton, TreeView, Orientation, Scale, CellRendererText, ComboBoxText, TreeViewColumn,
+    Application, ApplicationWindow as Window, Box as GtkBox, FileChooserAction,
+    FileChooserDialog, HeaderBar, MenuButton, ResponseType, ScrolledWindow,
+    Orientation, PopoverMenu, PopoverMenuBar,
 };
+use gtk4::prelude::*;
 use libadwaita as adw;
 use adw::prelude::*;
-use adw::{HeaderBar as AdwHeaderBar, Clamp, WindowTitle};
-use std::path::PathBuf;
-use std::rc::Rc;
 use std::cell::RefCell;
-use std::fs::File;
-use std::io::Read;
-use log::{debug, info, warn, error};
+use std::rc::Rc;
+use std::path::PathBuf;
+use log::{info, error};
 
-use crate::core::document::{Document, DocumentFormat};
-use crate::core::layer::Layer;
-use crate::tools::{ToolType, ToolManager};
-use crate::ui::canvas::Canvas;
-use crate::ui::layers_panel::LayersPanel;
+use crate::core::document::Document;
+use crate::core::canvas::Canvas;
+use crate::tools::ToolManager;
+use crate::ui::CanvasWidget;
 use crate::ui::tools_panel::ToolsPanel;
-use crate::ui::history_panel::HistoryPanel;
-use crate::ui::settings::SettingsDialog;
-use crate::ui::filters_panel::FiltersPanel;
+use crate::ui::layers_panel::LayersPanel;
+use crate::ui::preferences::PreferencesDialog;
+use crate::ui::menu_manager::MenuManager;
 
 pub struct MainWindow {
-    pub window: ApplicationWindow,
+    pub window: Window,
     pub document: RefCell<Option<Rc<RefCell<Document>>>>,
     pub canvas: Rc<RefCell<Canvas>>,
-    pub tool_manager: ToolManager,
+    pub canvas_widget: Rc<RefCell<CanvasWidget>>,
+    pub tools_panel: Rc<RefCell<ToolsPanel>>,
+    pub layers_panel: Rc<RefCell<LayersPanel>>,
+    pub tool_manager: Rc<RefCell<ToolManager>>,
+    pub menu_manager: Rc<RefCell<MenuManager>>,
     pub current_file_path: Option<PathBuf>,
 }
 
 impl MainWindow {
     pub fn new(app: &Application) -> Self {
-        info!("Creating main window");
-        
-        let window = ApplicationWindow::builder()
-            .application(app)
-            .title("Rust Photo Editor")
-            .default_width(1200)
-            .default_height(800)
-            .build();
+        let window = Window::new(app);
+        window.set_title(Some("Rust Photo Editor"));
+        window.set_default_size(1200, 800);
 
+        // Create the main layout
         let main_box = GtkBox::new(Orientation::Vertical, 0);
-        window.set_child(Some(&main_box));
+        main_box.set_hexpand(true);
+        main_box.set_vexpand(true);
 
-        // Create toolbar
-        let toolbar = GtkBox::new(Orientation::Horizontal, 5);
-        toolbar.add_css_class("toolbar");
-        main_box.append(&toolbar);
+        // Create header bar
+        let header = HeaderBar::new();
+        window.set_titlebar(Some(&header));
 
-        // Create open button
-        let open_button = Button::with_label("Open");
-        open_button.add_css_class("tool-button");
-        toolbar.append(&open_button);
+        // Create menu bar
+        let menu_manager = Rc::new(RefCell::new(MenuManager::new()));
+        let menu_bar = gtk4::PopoverMenuBar::from_model(Some(&menu_manager.borrow().get_menu_bar()));
+        main_box.prepend(&menu_bar);
 
-        // Create save button
-        let save_button = Button::with_label("Save");
-        save_button.add_css_class("tool-button");
-        toolbar.append(&save_button);
+        // Add actions to the window
+        window.insert_action_group("app", Some(menu_manager.borrow().get_actions()));
 
-        // Create settings button
-        let settings_button = Button::with_label("Settings");
-        settings_button.add_css_class("tool-button");
-        toolbar.append(&settings_button);
+        // Create tool manager
+        let tool_manager = Rc::new(RefCell::new(ToolManager::new()));
 
-        // Create canvas area
+        // Create canvas
+        let canvas = Rc::new(RefCell::new(Canvas::new(800, 600)));
+        let canvas_widget = Rc::new(RefCell::new(CanvasWidget::new()));
+
+        // Create tools panel
+        let tools_panel = Rc::new(RefCell::new(ToolsPanel::new(tool_manager.clone())));
+
+        // Create layers panel
+        let layers_panel = Rc::new(RefCell::new(LayersPanel::new()));
+
+        // Create scrolled window for canvas
         let canvas_scroll = ScrolledWindow::new();
         canvas_scroll.set_hexpand(true);
         canvas_scroll.set_vexpand(true);
-        canvas_scroll.add_css_class("canvas-area");
+        canvas_scroll.set_child(Some(canvas_widget.borrow().widget()));
 
-        let canvas = Canvas::new();
-        canvas_scroll.set_child(Some(canvas.widget()));
-        main_box.append(&canvas_scroll);
+        // Create content box for main area
+        let content_box = GtkBox::new(Orientation::Horizontal, 0);
+        content_box.set_hexpand(true);
+        content_box.set_vexpand(true);
 
-        let window_obj = Self {
+        // Set up layout with panes
+        let h_paned = gtk4::Paned::new(Orientation::Horizontal);
+        h_paned.set_start_child(Some(&tools_panel.borrow().widget));
+        h_paned.set_end_child(Some(&canvas_scroll));
+        h_paned.set_resize_start_child(false);
+        h_paned.set_shrink_start_child(false);
+        h_paned.set_position(200);
+
+        let v_paned = gtk4::Paned::new(Orientation::Horizontal);
+        v_paned.set_start_child(Some(&h_paned));
+        v_paned.set_end_child(Some(&layers_panel.borrow().widget));
+        v_paned.set_resize_end_child(false);
+        v_paned.set_shrink_end_child(false);
+        v_paned.set_position(1000);
+
+        content_box.append(&v_paned);
+        main_box.append(&content_box);
+        window.set_child(Some(&main_box));
+
+        Self {
             window,
-            canvas: Rc::new(RefCell::new(canvas)),
             document: RefCell::new(None),
-            tool_manager: ToolManager::new(),
+            canvas,
+            canvas_widget,
+            tools_panel,
+            layers_panel,
+            tool_manager,
+            menu_manager,
             current_file_path: None,
-        };
-
-        // Connect signals
-        let window_ref = window_obj.clone();
-        open_button.connect_clicked(move |_| {
-            window_ref.on_open_clicked();
-        });
-
-        let window_ref = window_obj.clone();
-        save_button.connect_clicked(move |_| {
-            window_ref.on_save_clicked();
-        });
-
-        let window_ref = window_obj.clone();
-        settings_button.connect_clicked(move |_| {
-            window_ref.on_settings_clicked();
-        });
-
-        window_obj
+        }
     }
-    
+
     pub fn clone(&self) -> Self {
         Self {
             window: self.window.clone(),
-            canvas: self.canvas.clone(),
             document: RefCell::new(self.document.borrow().clone()),
+            canvas: self.canvas.clone(),
+            canvas_widget: self.canvas_widget.clone(),
+            tools_panel: self.tools_panel.clone(),
+            layers_panel: self.layers_panel.clone(),
             tool_manager: self.tool_manager.clone(),
+            menu_manager: self.menu_manager.clone(),
             current_file_path: self.current_file_path.clone(),
         }
     }
-    
-    fn on_open_clicked(&self) {
-        info!("Open button clicked");
-        
-        let dialog = FileChooserDialog::new(
-            Some("Open Image"),
-            Some(&self.window),
-            FileChooserAction::Open,
-            &[("Cancel", ResponseType::Cancel), ("Open", ResponseType::Accept)],
-        );
-        
-        let filter = gtk4::FileFilter::new();
-        filter.add_mime_type("image/jpeg");
-        filter.add_mime_type("image/png");
-        filter.add_mime_type("image/tiff");
-        filter.add_mime_type("image/webp");
-        dialog.add_filter(&filter);
-        
-        let window_ref = self.clone();
-        dialog.connect_response(move |dialog, response| {
-            if response == ResponseType::Accept {
-                if let Some(file) = dialog.file() {
-                    if let Some(path) = file.path() {
-                        match Document::from_file(&path) {
-                            Ok(document) => {
-                                window_ref.set_document(document);
-                            }
-                            Err(err) => {
-                                error!("Failed to open document: {}", err);
-                            }
-                        }
-                    }
-                }
-            }
-            dialog.close();
-        });
-        
-        dialog.show();
-    }
-    
-    fn on_save_clicked(&self) {
-        info!("Save button clicked");
-        
-        if let Some(doc) = self.document.borrow().as_ref() {
-            let dialog = FileChooserDialog::new(
-                Some("Save Image"),
-                Some(&self.window),
-                FileChooserAction::Save,
-                &[("Cancel", ResponseType::Cancel), ("Save", ResponseType::Accept)],
-            );
-            
-            let filter = gtk4::FileFilter::new();
-            filter.add_mime_type("image/jpeg");
-            filter.add_mime_type("image/png");
-            filter.add_mime_type("image/tiff");
-            filter.add_mime_type("image/webp");
-            dialog.add_filter(&filter);
-            
-            let doc_ref = doc.clone();
-            dialog.connect_response(move |dialog, response| {
-                if response == ResponseType::Accept {
-                    if let Some(file) = dialog.file() {
-                        if let Some(path) = file.path() {
-                            let mut doc = doc_ref.borrow_mut();
-                            if let Err(err) = doc.save(&path) {
-                                error!("Failed to save document: {}", err);
-                            }
-                        }
-                    }
-                }
-                dialog.close();
-            });
-            
-            dialog.show();
-        }
-    }
-    
-    fn on_settings_clicked(&self) {
-        let dialog = SettingsDialog::new(&self.window);
-        dialog.show();
-    }
-    
-    fn set_document(&self, document: Document) {
-        *self.document.borrow_mut() = Some(Rc::new(RefCell::new(document.clone())));
-        let mut canvas = self.canvas.borrow_mut();
-        canvas.set_document(Some(document));
-    }
-    
+
     fn create_canvas(&self, document: &Document) -> Canvas {
-        let mut canvas = Canvas::new();
-        canvas.width = document.width as i32;
-        canvas.height = document.height as i32;
-        canvas.set_document(Some(document.clone()));
+        let mut canvas = Canvas::new(document.width as u32, document.height as u32);
+        canvas.width = document.width as u32;
+        canvas.height = document.height as u32;
         canvas
+    }
+
+    pub fn open_document(&self, document: Document) {
+        let document = Rc::new(RefCell::new(document));
+        *self.document.borrow_mut() = Some(document.clone());
+        
+        // Update the core canvas
+        self.canvas.borrow_mut().document = Some(document.clone());
+        
+        // Update the canvas widget
+        let mut canvas_widget = self.canvas_widget.borrow_mut();
+        canvas_widget.set_document(Some(document.borrow().clone()));
     }
 } 

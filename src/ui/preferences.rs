@@ -14,18 +14,19 @@ use log::{debug, info, error};
 
 use crate::core::settings::{Settings, PerformanceSettings, SaveSettings, DisplaySettings};
 
-pub struct SettingsDialog {
+pub struct PreferencesDialog {
     dialog: Dialog,
     settings: Rc<RefCell<Settings>>,
 }
 
-impl SettingsDialog {
+impl PreferencesDialog {
     pub fn new(parent: &ApplicationWindow) -> Self {
-        let dialog = Dialog::builder()
-            .title("Settings")
-            .modal(true)
-            .transient_for(parent)
-            .build();
+        let dialog = Dialog::with_buttons(
+            Some("Preferences"),
+            Some(parent),
+            DialogFlags::MODAL | DialogFlags::DESTROY_WITH_PARENT | DialogFlags::USE_HEADER_BAR,
+            &[("Cancel", ResponseType::Cancel), ("OK", ResponseType::Ok)]
+        );
 
         let settings = Settings::load().expect("Failed to load settings");
         let settings = Rc::new(RefCell::new(settings));

@@ -33,12 +33,12 @@ use std::cell::RefMut;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ToolType {
     // Selection tools
-    Move,
     Selection,
     RectangleSelection,
     EllipseSelection,
     LassoSelection,
     MagicWandSelection,
+    Move,
     
     // Paint tools
     Brush,
@@ -60,6 +60,34 @@ pub enum ToolType {
     ColorPicker,
     Zoom,
     Pan,
+}
+
+impl std::fmt::Display for ToolType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ToolType::Selection => write!(f, "Selection"),
+            ToolType::RectangleSelection => write!(f, "RectangleSelection"),
+            ToolType::EllipseSelection => write!(f, "EllipseSelection"),
+            ToolType::LassoSelection => write!(f, "LassoSelection"),
+            ToolType::MagicWandSelection => write!(f, "MagicWandSelection"),
+            ToolType::Move => write!(f, "Move"),
+            ToolType::Brush => write!(f, "Brush"),
+            ToolType::Eraser => write!(f, "Eraser"),
+            ToolType::Clone => write!(f, "Clone"),
+            ToolType::Heal => write!(f, "Heal"),
+            ToolType::Fill => write!(f, "Fill"),
+            ToolType::VectorRectangle => write!(f, "VectorRectangle"),
+            ToolType::VectorEllipse => write!(f, "VectorEllipse"),
+            ToolType::VectorPath => write!(f, "VectorPath"),
+            ToolType::VectorText => write!(f, "VectorText"),
+            ToolType::Crop => write!(f, "Crop"),
+            ToolType::Text => write!(f, "Text"),
+            ToolType::Gradient => write!(f, "Gradient"),
+            ToolType::ColorPicker => write!(f, "ColorPicker"),
+            ToolType::Zoom => write!(f, "Zoom"),
+            ToolType::Pan => write!(f, "Pan"),
+        }
+    }
 }
 
 /// Custom error type for ToolType parsing

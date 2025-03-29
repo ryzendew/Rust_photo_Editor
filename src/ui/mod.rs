@@ -30,71 +30,63 @@ const APP_CSS: &str = "
         color: #e0e0e0;
     }
 
+    headerbar {
+        background-color: #242424;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        padding: 4px;
+        min-height: 32px;
+    }
+
+    .menu-button {
+        padding: 4px 8px;
+        margin: 2px;
+        border-radius: 4px;
+        color: #e0e0e0;
+        background-color: transparent;
+        border: none;
+    }
+
+    .menu-button:hover {
+        background-color: rgba(255,255,255,0.1);
+    }
+
     .toolbar {
         background-color: #242424;
         border-right: 1px solid rgba(255,255,255,0.05);
         padding: 8px;
+        min-width: 48px;
     }
 
     .tool-button {
-        padding: 12px;
-        margin: 4px;
-        border-radius: 8px;
+        padding: 8px;
+        margin: 2px;
+        border-radius: 4px;
         color: #e0e0e0;
-        background-color: #2d2d2d;
+        background-color: transparent;
         min-width: 32px;
         min-height: 32px;
         transition: all 200ms ease;
     }
 
     .tool-button:hover {
-        background-color: #353535;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        background-color: rgba(255,255,255,0.1);
     }
 
     .tool-button:active,
     .tool-button.active {
         background-color: @accent_bg_color;
         color: @accent_fg_color;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
 
     .sidebar {
         background-color: #242424;
         border-left: 1px solid rgba(255,255,255,0.05);
         padding: 8px;
-    }
-
-    .sidebar tab-box {
-        padding: 8px;
-        background-color: #2d2d2d;
-        border-radius: 8px;
-        margin-bottom: 8px;
-    }
-
-    .sidebar button {
-        padding: 8px 12px;
-        margin: 2px;
-        border-radius: 6px;
-        color: #e0e0e0;
-        background-color: #2d2d2d;
-        border: none;
-        box-shadow: none;
-    }
-
-    .sidebar button:hover {
-        background-color: #353535;
-    }
-
-    .sidebar button.active {
-        background-color: @accent_bg_color;
-        color: @accent_fg_color;
+        min-width: 250px;
     }
 
     .canvas-area {
         background-color: #1e1e1e;
-        border-radius: 8px;
-        margin: 8px;
     }
 
     .canvas-area .placeholder {
@@ -102,60 +94,44 @@ const APP_CSS: &str = "
         font-size: 1.1em;
     }
 
-    headerbar {
-        background-color: #242424;
-        border-bottom: 1px solid rgba(255,255,255,0.05);
-        padding: 8px;
-        min-height: 48px;
+    paned separator {
+        background-color: rgba(255,255,255,0.05);
+        min-width: 1px;
+        min-height: 1px;
     }
 
-    headerbar button {
-        padding: 8px 16px;
-        margin: 2px;
-        border-radius: 6px;
-        color: #e0e0e0;
-        background-color: #2d2d2d;
+    scrolledwindow {
         border: none;
-        box-shadow: none;
-        min-height: 32px;
     }
 
-    headerbar button:hover {
-        background-color: #353535;
+    scrolledwindow undershoot,
+    scrolledwindow overshoot {
+        background: none;
     }
 
-    scale {
-        margin: 8px 0;
+    scrollbar {
+        background-color: transparent;
+        transition: all 200ms ease;
     }
 
-    scale trough {
-        background-color: #2d2d2d;
-        border-radius: 4px;
+    scrollbar slider {
+        min-width: 6px;
         min-height: 6px;
-    }
-
-    scale highlight {
-        background-color: @accent_bg_color;
         border-radius: 3px;
+        background-color: rgba(255,255,255,0.2);
     }
 
-    combobox button {
-        background-color: #2d2d2d;
-        border: 1px solid rgba(255,255,255,0.05);
-        border-radius: 6px;
-        padding: 8px;
-        color: #e0e0e0;
-        min-height: 32px;
+    scrollbar slider:hover {
+        background-color: rgba(255,255,255,0.3);
     }
 
-    combobox button:hover {
-        background-color: #353535;
+    scrollbar slider:active {
+        background-color: rgba(255,255,255,0.4);
     }
 
     treeview {
-        background-color: #2d2d2d;
+        background-color: transparent;
         color: #e0e0e0;
-        border-radius: 6px;
     }
 
     treeview:selected {
@@ -163,21 +139,34 @@ const APP_CSS: &str = "
         color: @accent_fg_color;
     }
 
-    scrolledwindow {
-        border-radius: 6px;
-    }
-
-    entry {
-        background-color: #2d2d2d;
+    button {
+        padding: 6px 12px;
+        border-radius: 4px;
+        border: none;
         color: #e0e0e0;
-        border: 1px solid rgba(255,255,255,0.05);
-        border-radius: 6px;
-        padding: 8px;
-        min-height: 32px;
+        background-color: rgba(255,255,255,0.1);
     }
 
-    entry:focus {
-        border-color: @accent_bg_color;
+    button:hover {
+        background-color: rgba(255,255,255,0.15);
+    }
+
+    button:active {
+        background-color: rgba(255,255,255,0.2);
+    }
+
+    .tools-panel flowbox {
+        background-color: transparent;
+    }
+
+    .tools-panel flowboxchild {
+        padding: 2px;
+    }
+
+    .tools-panel button {
+        padding: 8px;
+        min-width: 32px;
+        min-height: 32px;
     }
 ";
 
@@ -193,29 +182,29 @@ pub fn init_styles() {
 }
 
 // UI components
-pub mod settings;
 pub mod main_window;
 pub mod canvas;
-pub mod layers_panel;
 pub mod tools_panel;
-pub mod history_panel;
+pub mod layers_panel;
+pub mod preferences;
+pub mod menu_manager;
 pub mod filters_panel;
 pub mod color_picker;
+pub mod history_panel;
 
-// Re-export the main components
-pub use settings::SettingsDialog;
-pub use crate::core::settings::Settings;
 pub use main_window::MainWindow;
-pub use canvas::Canvas as UiCanvas;
-pub use layers_panel::LayersPanel;
+pub use canvas::Canvas as CanvasWidget;
 pub use tools_panel::ToolsPanel;
-pub use history_panel::HistoryPanel;
+pub use layers_panel::LayersPanel;
+pub use preferences::PreferencesDialog;
+pub use menu_manager::MenuManager;
 pub use filters_panel::FiltersPanel;
 pub use color_picker::ColorPicker;
+pub use history_panel::HistoryPanel;
 
-// For showing settings dialog
-pub fn show_settings_dialog(parent: &ApplicationWindow) -> SettingsDialog {
-    let dialog = SettingsDialog::new(parent);
+// For showing preferences dialog
+pub fn show_preferences_dialog(parent: &ApplicationWindow) -> PreferencesDialog {
+    let dialog = PreferencesDialog::new(parent);
     dialog.show();
     dialog
 }

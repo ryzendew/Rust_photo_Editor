@@ -10,6 +10,7 @@ use log::{debug, info};
 use crate::core::document::Document;
 use crate::core::layer::{Layer, LayerManager};
 
+#[derive(Clone)]
 pub struct LayersPanel {
     pub widget: GtkBox,
     pub layer_store: ListStore,

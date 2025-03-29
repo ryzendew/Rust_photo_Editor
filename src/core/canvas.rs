@@ -8,6 +8,7 @@ use image::{DynamicImage, ImageBuffer, Rgba};
 use std::collections::HashMap;
 use crate::core::layer::{Layer, LayerManager};
 use crate::core::selection::Selection;
+use crate::core::document::Document;
 
 /// Available tools for image editing
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -77,6 +78,8 @@ pub struct Canvas {
     pub mouse_y: f64,
     pub vector_document: Option<VectorDocument>,
     pub has_vector_mode: bool,
+    /// The current document
+    pub document: Option<Rc<RefCell<Document>>>,
 }
 
 impl Canvas {
@@ -100,6 +103,7 @@ impl Canvas {
             mouse_y: 0.0,
             vector_document: None,
             has_vector_mode: false,
+            document: None,
         }
     }
     
@@ -126,6 +130,7 @@ impl Canvas {
             mouse_y: 0.0,
             vector_document: None,
             has_vector_mode: false,
+            document: None,
         }
     }
     
@@ -498,5 +503,16 @@ impl Canvas {
     /// Gets the current mouse position
     pub fn get_mouse_position(&self) -> (f64, f64) {
         (self.mouse_x, self.mouse_y)
+    }
+
+    /// Set the current document
+    pub fn set_document(&mut self, document: Option<Rc<RefCell<Document>>>) {
+        self.document = document;
+        if let Some(doc) = &self.document {
+            let doc = doc.borrow();
+            self.width = doc.width;
+            self.height = doc.height;
+            self.layer_manager = doc.layer_manager.clone();
+        }
     }
 } 
