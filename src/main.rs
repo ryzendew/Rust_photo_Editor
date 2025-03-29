@@ -40,6 +40,11 @@ fn main() {
         .application_id("com.example.rust_photo")
         .build();
     
+    // Initialize styles when the application is activated
+    app.connect_startup(|_| {
+        ui::init_styles();
+    });
+    
     app.connect_activate(|app| {
         let main_window = MainWindow::new(app);
         main_window.window.show();

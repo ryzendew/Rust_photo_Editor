@@ -84,7 +84,7 @@ impl Canvas {
     
     pub fn draw(&self, cr: &Context) {
         // Clear the canvas
-        cr.set_source_rgb(0.9, 0.9, 0.9);
+        cr.set_source_rgb(0.2, 0.2, 0.2);
         cr.paint().expect("Failed to paint background");
         
         // Draw a checkerboard pattern for transparent areas
@@ -120,9 +120,9 @@ impl Canvas {
         for y in (0..(height as i32)).step_by(cell_size as usize) {
             for x in (0..(width as i32)).step_by(cell_size as usize) {
                 if (x / cell_size as i32 + y / cell_size as i32) % 2 == 0 {
-                    cr.set_source_rgb(0.8, 0.8, 0.8);
+                    cr.set_source_rgb(0.3, 0.3, 0.3);
                 } else {
-                    cr.set_source_rgb(0.7, 0.7, 0.7);
+                    cr.set_source_rgb(0.25, 0.25, 0.25);
                 }
                 cr.rectangle(x as f64, y as f64, cell_size, cell_size);
                 cr.fill().expect("Failed to fill checkerboard cell");
@@ -131,11 +131,11 @@ impl Canvas {
     }
     
     fn draw_placeholder(&self, cr: &Context) {
-        cr.set_source_rgb(0.8, 0.8, 0.8);
+        cr.set_source_rgb(0.3, 0.3, 0.3);
         cr.rectangle(0.0, 0.0, self.width as f64, self.height as f64);
         cr.fill().expect("Failed to fill placeholder");
         
-        cr.set_source_rgb(0.4, 0.4, 0.4);
+        cr.set_source_rgb(0.6, 0.6, 0.6);
         cr.set_font_size(24.0);
         let text = "No document loaded";
         let extents = cr.text_extents(text).expect("Failed to get text extents");

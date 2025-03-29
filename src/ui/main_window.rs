@@ -2,7 +2,7 @@ use gtk4::prelude::*;
 use gtk4::{
     Application, ApplicationWindow, Box as GtkBox, Button, DrawingArea, FileChooserAction,
     FileChooserDialog, HeaderBar, Label, Notebook, Overlay, ResponseType, ScrolledWindow,
-    Stack, StackSwitcher, ToggleButton,
+    Stack, StackSwitcher, ToggleButton, TreeView, Orientation, Scale, CellRendererText, ComboBoxText, TreeViewColumn,
 };
 use libadwaita as adw;
 use adw::prelude::*;
@@ -44,122 +44,179 @@ impl MainWindow {
             .default_height(800)
             .build();
             
-        // Create the HeaderBar
-        let header_bar = AdwHeaderBar::builder()
-            .title_widget(&WindowTitle::new("Rust Photo", ""))
+        // Create the main layout box
+        let main_box = GtkBox::new(Orientation::Vertical, 0);
+        
+        // Create header bar
+        let header = AdwHeaderBar::builder()
+            .css_classes(vec!["flat"])
             .build();
-            
-        // Create the main layout
-        let main_box = GtkBox::new(gtk4::Orientation::Vertical, 0);
         
-        // Create the menu button
-        let menu_button = Button::with_label("Open");
-        menu_button.set_margin_start(10);
-        menu_button.set_margin_end(10);
-        
-        // Create the save button
+        // Add main action buttons
+        let open_button = Button::with_label("Open");
         let save_button = Button::with_label("Save");
-        save_button.set_margin_start(10);
-        save_button.set_margin_end(10);
+        header.pack_start(&open_button);
+        header.pack_start(&save_button);
         
-        // Create the settings button
-        let settings_button = Button::with_label("Settings");
-        settings_button.set_margin_start(10);
-        settings_button.set_margin_end(10);
+        // Add settings button
+        let settings_button = Button::from_icon_name("emblem-system-symbolic");
+        header.pack_end(&settings_button);
         
-        // Add the buttons to the header bar
-        header_bar.pack_start(&menu_button);
-        header_bar.pack_start(&save_button);
-        header_bar.pack_end(&settings_button);
+        main_box.append(&header);
         
-        // Create the main content area
-        let content_box = GtkBox::new(gtk4::Orientation::Horizontal, 0);
+        // Create the content area
+        let content = GtkBox::new(Orientation::Horizontal, 0);
+        content.set_hexpand(true);
+        content.set_vexpand(true);
         
-        // Create the left panel for tools
-        let tools_panel = ToolsPanel::new();
-        let tools_box = tools_panel.get_widget();
-        tools_box.set_size_request(200, -1);
-        content_box.append(&tools_box);
+        // Create toolbar
+        let toolbar = GtkBox::new(Orientation::Vertical, 4);
+        toolbar.set_margin_start(8);
+        toolbar.set_margin_end(8);
+        toolbar.set_margin_top(8);
+        toolbar.set_margin_bottom(8);
+        toolbar.add_css_class("toolbar");
         
-        // Create the center area for the canvas
-        let canvas_box = GtkBox::new(gtk4::Orientation::Vertical, 0);
+        // Add tool buttons
+        let tools = vec![
+            ("Move", "object-select-symbolic"),
+            ("Select", "edit-select-all-symbolic"),
+            ("Brush", "edit-clear-symbolic"),
+            ("Eraser", "edit-clear-all-symbolic"),
+            ("Fill", "color-fill-symbolic"),
+            ("Gradient", "gradient-symbolic"),
+        ];
+        
+        for (name, icon) in tools {
+            let button = Button::builder()
+                .icon_name(icon)
+                .tooltip_text(name)
+                .css_classes(vec!["flat", "tool-button"])
+                .build();
+            toolbar.append(&button);
+        }
+        
+        content.append(&toolbar);
+        
+        // Create canvas area
+        let canvas_box = GtkBox::new(Orientation::Vertical, 0);
         canvas_box.set_hexpand(true);
         canvas_box.set_vexpand(true);
         
-        // Create a scrolled window for the canvas
-        let scrolled_window = ScrolledWindow::builder()
-            .hscrollbar_policy(gtk4::PolicyType::Automatic)
-            .vscrollbar_policy(gtk4::PolicyType::Automatic)
-            .build();
-        scrolled_window.set_hexpand(true);
-        scrolled_window.set_vexpand(true);
+        let scroll = ScrolledWindow::new();
+        scroll.set_hexpand(true);
+        scroll.set_vexpand(true);
         
-        // Create a placeholder for the canvas
         let placeholder = Label::new(Some("Open or create a document to start editing"));
-        placeholder.set_hexpand(true);
+        placeholder.add_css_class("dim-label");
         placeholder.set_vexpand(true);
-        scrolled_window.set_child(Some(&placeholder));
         
-        canvas_box.append(&scrolled_window);
-        content_box.append(&canvas_box);
+        scroll.set_child(Some(&placeholder));
+        canvas_box.append(&scroll);
         
-        // Create the right panel for layers, history, etc.
-        let right_panel = Notebook::new();
-        right_panel.set_size_request(250, -1);
+        content.append(&canvas_box);
         
-        // Create the layers panel
-        let layers_panel = LayersPanel::new();
-        let layers_widget = layers_panel.get_widget();
-        right_panel.append_page(&layers_widget, Some(&Label::new(Some("Layers"))));
+        // Create right sidebar
+        let sidebar = GtkBox::new(Orientation::Vertical, 0);
+        sidebar.set_width_request(300);
         
-        // Create the history panel
-        let history_panel = HistoryPanel::new();
-        let history_widget = history_panel.get_widget();
-        right_panel.append_page(&history_widget, Some(&Label::new(Some("History"))));
+        // Add tab buttons
+        let tab_box = GtkBox::new(Orientation::Horizontal, 0);
+        tab_box.add_css_class("linked");
         
-        // Create the filters panel
-        let filters_panel = FiltersPanel::new();
-        let filters_widget = filters_panel.get_widget();
-        right_panel.append_page(&filters_widget, Some(&Label::new(Some("Filters"))));
+        let layers_button = Button::with_label("Layers");
+        layers_button.add_css_class("active");
+        let history_button = Button::with_label("History");
+        let filters_button = Button::with_label("Filters");
         
-        content_box.append(&right_panel);
+        tab_box.append(&layers_button);
+        tab_box.append(&history_button);
+        tab_box.append(&filters_button);
         
-        // Add all components to the main box
-        main_box.append(&header_bar);
-        main_box.append(&content_box);
+        sidebar.append(&tab_box);
+        
+        // Add panels stack
+        let stack = Stack::new();
+        stack.set_vexpand(true);
+        
+        // Layers panel
+        let layers_panel = GtkBox::new(Orientation::Vertical, 0);
+        let layers_list = TreeView::new();
+        layers_list.set_vexpand(true);
+        
+        let name_column = TreeViewColumn::new();
+        name_column.set_title("Name");
+        let name_cell = CellRendererText::new();
+        name_column.pack_start(&name_cell, true);
+        layers_list.append_column(&name_column);
+        
+        let type_column = TreeViewColumn::new();
+        type_column.set_title("Type");
+        let type_cell = CellRendererText::new();
+        type_column.pack_start(&type_cell, true);
+        layers_list.append_column(&type_column);
+        
+        layers_panel.append(&layers_list);
+        
+        // Layer controls
+        let layer_controls = GtkBox::new(Orientation::Vertical, 4);
+        layer_controls.set_margin_start(8);
+        layer_controls.set_margin_end(8);
+        layer_controls.set_margin_top(8);
+        layer_controls.set_margin_bottom(8);
+        
+        let opacity_box = GtkBox::new(Orientation::Horizontal, 4);
+        opacity_box.append(&Label::new(Some("Opacity")));
+        let opacity_scale = Scale::with_range(Orientation::Horizontal, 0.0, 100.0, 1.0);
+        opacity_box.append(&opacity_scale);
+        
+        let blend_box = GtkBox::new(Orientation::Horizontal, 4);
+        blend_box.append(&Label::new(Some("Blend Mode")));
+        let blend_combo = ComboBoxText::new();
+        blend_combo.append(Some("normal"), "Normal");
+        blend_combo.append(Some("multiply"), "Multiply");
+        blend_combo.append(Some("screen"), "Screen");
+        blend_combo.set_active_id(Some("normal"));
+        blend_box.append(&blend_combo);
+        
+        layer_controls.append(&opacity_box);
+        layer_controls.append(&blend_box);
+        layers_panel.append(&layer_controls);
+        
+        stack.add_titled(&layers_panel, Some("layers"), "Layers");
+        
+        // History panel
+        let history_panel = GtkBox::new(Orientation::Vertical, 0);
+        let history_list = TreeView::new();
+        history_list.set_vexpand(true);
+        history_panel.append(&history_list);
+        stack.add_titled(&history_panel, Some("history"), "History");
+        
+        // Filters panel  
+        let filters_panel = GtkBox::new(Orientation::Vertical, 0);
+        let filters_list = TreeView::new();
+        filters_list.set_vexpand(true);
+        filters_panel.append(&filters_list);
+        stack.add_titled(&filters_panel, Some("filters"), "Filters");
+        
+        sidebar.append(&stack);
+        content.append(&sidebar);
+        
+        main_box.append(&content);
         
         // Set the window content
         window.set_child(Some(&main_box));
         
-        // Create the main window instance
-        let main_window = MainWindow {
+        // Create tool manager
+        let tool_manager = ToolManager::new();
+        
+        MainWindow {
             window,
             document: None,
             canvas: None,
-            tool_manager: ToolManager::new(),
+            tool_manager,
             current_file_path: None,
-        };
-        
-        // Connect signals
-        let window_clone = main_window.window.clone();
-        menu_button.connect_clicked(move |_| {
-            MainWindow::on_open_clicked(&window_clone);
-        });
-        
-        let window_clone = main_window.window.clone();
-        let main_window_clone = Rc::new(RefCell::new(main_window.clone()));
-        save_button.connect_clicked(move |_| {
-            let main_window = main_window_clone.borrow();
-            MainWindow::on_save_clicked(&window_clone, main_window.document.as_ref(), main_window.current_file_path.clone());
-        });
-        
-        let window_clone = main_window.window.clone();
-        settings_button.connect_clicked(move |_| {
-            MainWindow::on_settings_clicked(&window_clone);
-        });
-        
-        info!("Main window created");
-        main_window
+        }
     }
     
     pub fn clone(&self) -> Self {

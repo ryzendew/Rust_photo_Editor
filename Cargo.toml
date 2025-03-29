@@ -51,7 +51,7 @@ ocl = { version = "0.19", optional = true }
 cuda-runtime-sys = { version = "0.3.0-alpha.1", optional = true }
 
 [features]
-default = []
+default = ["gpu-cuda"]
 gpu-vulkan = ["dep:vulkano"]
 gpu-wgpu = ["dep:wgpu"]
 gpu-cuda = ["dep:ocl", "dep:cuda-runtime-sys"]
