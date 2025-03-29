@@ -176,8 +176,8 @@ impl AppState {
             self.documents.remove(index);
             
             // Update current document if necessary
-            if let Some(current) = &self.current_document {
-                if std::ptr::eq(current, document) {
+            if let Some(_document) = &self.current_document {
+                if std::ptr::eq(document, _document) {
                     debug!("Closed document was the current document, updating current document");
                     self.current_document = self.documents.first().cloned();
                     if self.current_document.is_some() {
@@ -193,7 +193,7 @@ impl AppState {
     }
 
     pub fn copy_selection(&mut self) {
-        if let Some(document) = &self.current_document {
+        if let Some(_document) = &self.current_document {
             info!("Copying selection from document");
             // Implementation will depend on selection type and content
             // This is a placeholder
@@ -203,7 +203,7 @@ impl AppState {
     }
 
     pub fn paste(&mut self) {
-        if let Some(document) = &mut self.current_document {
+        if let Some(_document) = &mut self.current_document {
             if let Some(content) = &self.clipboard {
                 info!("Pasting to document");
                 match content {

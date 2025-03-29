@@ -6,8 +6,11 @@ use std::rc::Rc;
 use log::{debug, info, warn, error};
 
 use crate::core::document::Document;
-use crate::core::layer::{Layer, LayerType};
-use crate::tools::{ToolType, ToolManager};
+use crate::core::layer::{Layer, LayerManager};
+use crate::tools::{ToolType, ToolManager, ToolContext};
+use crate::vector::{VectorDocument, Point};
+use crate::ui::ColorPicker;
+use crate::core::selection::Selection;
 
 #[derive(Clone)]
 pub struct Canvas {
@@ -103,9 +106,9 @@ impl Canvas {
     }
     
     fn draw_vector_document(&self, cr: &Context, doc: &VectorDocument) {
-        // Draw each shape in the vector document
-        for shape in doc.shapes.iter() {
-            shape.draw(cr);
+        // Draw each layer in the vector document
+        for layer in doc.get_layers() {
+            layer.draw(cr);
         }
     }
     
@@ -147,7 +150,7 @@ impl Canvas {
         if let Some(layer_manager) = &self.layer_manager {
             for layer in layer_manager.get_layers() {
                 if layer.visible {
-                    layer.render(cr, self.width, self.height);
+                    layer.render(cr, self.width as u32, self.height as u32);
                 }
             }
         }

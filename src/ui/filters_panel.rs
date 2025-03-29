@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::{
     Box as GtkBox, Button, CellRendererText, ComboBoxText, Entry, Label, ListStore,
-    Orientation, Scale, ScrolledWindow, Separator, TreeView, TreeViewColumn,
+    Orientation, Scale, ScrolledWindow, Separator, TreeView, TreeViewColumn, PositionType,
 };
 use std::rc::Rc;
 use std::cell::RefCell;

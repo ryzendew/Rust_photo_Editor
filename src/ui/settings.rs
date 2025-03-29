@@ -367,11 +367,9 @@ impl SettingsDialog {
             settings_clone.borrow_mut().save.default_location = entry.text().to_string();
         });
         
-        let entry_clone = location_entry.clone();
-        browse_button.connect_clicked(move |_| {
-            // Here you would show a file chooser dialog
-            // and update the entry with the selected path
-        });
+        let _entry_clone = location_entry.clone();
+        let browse_button = Button::with_label("Browse...");
+        grid.attach(&browse_button, 2, 4, 1, 1);
         
         page
     }
@@ -467,12 +465,12 @@ impl SettingsDialog {
             false.into()
         });
         
-        color1_button.connect_clicked(|btn| {
+        color1_button.connect_clicked(|_btn| {
             // Here you would show a color chooser dialog
             // and update the button label and setting with the selected color
         });
         
-        color2_button.connect_clicked(|btn| {
+        color2_button.connect_clicked(|_btn| {
             // Here you would show a color chooser dialog
             // and update the button label and setting with the selected color
         });

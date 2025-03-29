@@ -34,7 +34,8 @@ pub mod filters_panel;
 pub mod color_picker;
 
 // Re-export the main components
-pub use settings::{Settings, SettingsDialog, SettingsManager};
+pub use settings::SettingsDialog;
+pub use crate::core::settings::Settings;
 pub use main_window::MainWindow;
 pub use canvas::Canvas as UiCanvas;
 pub use layers_panel::LayersPanel;

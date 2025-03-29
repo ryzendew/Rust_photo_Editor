@@ -8,7 +8,7 @@ use std::cell::RefCell;
 use log::{debug, info};
 
 use crate::core::document::Document;
-use crate::core::layer::{Layer, LayerType, LayerId, LayerManager};
+use crate::core::layer::{Layer, LayerManager};
 
 pub struct LayersPanel {
     pub widget: GtkBox,
@@ -145,9 +145,7 @@ impl LayersPanel {
         
         // Populate the layer store with layers from the document
         let doc = document.borrow();
-        if let Some(layer_manager) = &doc.layer_manager {
-            self.update_layer_list(layer_manager);
-        }
+        self.update_layer_list(&doc.layer_manager);
     }
     
     fn update_layer_list(&self, layer_manager: &LayerManager) {
@@ -161,12 +159,12 @@ impl LayersPanel {
         // Add layers to the store
         for &layer_id in layer_indices.iter() {
             if let Some(layer) = layer_manager.get_layer(layer_id) {
-                self.add_layer_to_store(layer, layer_id);
+                self.add_layer_to_store(layer, layer_id.to_string());
             }
         }
     }
     
-    fn add_layer_to_store(&self, layer: &Layer, layer_id: LayerId) {
+    fn add_layer_to_store(&self, layer: &Layer, layer_id: String) {
         // Determine a type string based on what's available in the Layer struct
         let type_str = "Raster"; // Default to raster since we only have image data in the Layer struct
         
@@ -174,7 +172,7 @@ impl LayersPanel {
         self.layer_store.insert_with_values(
             None,
             &[
-                (0, &(layer_id as u32)),
+                (0, &(layer_id.parse::<u32>().unwrap())),
                 (1, &layer.name),
                 (2, &layer.visible),
                 (3, &type_str),
@@ -185,9 +183,7 @@ impl LayersPanel {
     pub fn update_from_document(&self) {
         if let Some(doc) = &self.document {
             let doc = doc.borrow();
-            if let Some(layer_manager) = &doc.layer_manager {
-                self.update_layer_list(layer_manager);
-            }
+            self.update_layer_list(&doc.layer_manager);
         }
     }
 } 

@@ -31,6 +31,15 @@ pub enum FontWeight {
     Bold,
 }
 
+impl std::fmt::Display for FontWeight {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            FontWeight::Normal => write!(f, "normal"),
+            FontWeight::Bold => write!(f, "bold"),
+        }
+    }
+}
+
 impl From<FontWeight> for CairoFontWeight {
     fn from(weight: FontWeight) -> Self {
         match weight {

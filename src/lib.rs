@@ -11,7 +11,7 @@ pub mod raw;
 
 // Re-export commonly used types
 pub use core::canvas::Canvas;
-pub use core::layers::{Layer, LayerManager};
+pub use core::layer::{Layer, LayerManager};
 pub use core::canvas::Tool;
 pub use vector::VectorShape;
 
@@ -22,43 +22,17 @@ pub const APP_ID: &str = "com.example.rust_photo";
 
 // GPU acceleration detection
 pub fn has_gpu_support() -> bool {
-    has_cuda_support() || has_rocm_support() || has_opencl_support() || has_wgpu_support()
+    has_vulkan_support() || has_wgpu_support()
 }
 
-/// Check if CUDA support is available
-pub fn has_cuda_support() -> bool {
-    #[cfg(feature = "gpu-cuda")]
+/// Check if Vulkan support is available
+pub fn has_vulkan_support() -> bool {
+    #[cfg(feature = "gpu-vulkan")]
     {
-        // Implementation would check for CUDA
+        // Implementation would check for Vulkan
         true
     }
-    #[cfg(not(feature = "gpu-cuda"))]
-    {
-        false
-    }
-}
-
-/// Check if ROCm support is available
-pub fn has_rocm_support() -> bool {
-    #[cfg(feature = "gpu-rocm")]
-    {
-        // Implementation would check for ROCm
-        true
-    }
-    #[cfg(not(feature = "gpu-rocm"))]
-    {
-        false
-    }
-}
-
-/// Check if OpenCL support is available
-pub fn has_opencl_support() -> bool {
-    #[cfg(feature = "gpu-opencl")]
-    {
-        // Implementation would check for OpenCL
-        true
-    }
-    #[cfg(not(feature = "gpu-opencl"))]
+    #[cfg(not(feature = "gpu-vulkan"))]
     {
         false
     }
@@ -81,42 +55,20 @@ pub fn has_wgpu_support() -> bool {
 pub fn init_gpu() -> Result<(), String> {
     if has_gpu_support() {
         // Try to initialize available GPU backends in order of preference
-        if has_cuda_support() {
-            return init_cuda();
-        } else if has_rocm_support() {
-            return init_rocm();
+        if has_vulkan_support() {
+            return init_vulkan();
         } else if has_wgpu_support() {
             return init_wgpu();
-        } else if has_opencl_support() {
-            return init_opencl();
         }
     }
     
     Ok(())
 }
 
-fn init_cuda() -> Result<(), String> {
-    #[cfg(feature = "gpu-cuda")]
+fn init_vulkan() -> Result<(), String> {
+    #[cfg(feature = "gpu-vulkan")]
     {
-        // CUDA initialization would go here
-    }
-    
-    Ok(())
-}
-
-fn init_rocm() -> Result<(), String> {
-    #[cfg(feature = "gpu-rocm")]
-    {
-        // ROCm initialization would go here
-    }
-    
-    Ok(())
-}
-
-fn init_opencl() -> Result<(), String> {
-    #[cfg(feature = "gpu-opencl")]
-    {
-        // OpenCL initialization would go here
+        // Vulkan initialization would go here
     }
     
     Ok(())

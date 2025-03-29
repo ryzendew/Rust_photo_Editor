@@ -1,4 +1,3 @@
-
 use crate::core::{Canvas, Layer};
 use crate::vector::Point;
 use image::{ImageBuffer, Rgba};
@@ -106,7 +105,7 @@ impl Tool for HealTool {
         self.last_point = Some(Point::new(x, y));
     }
     
-    fn mouse_up(&mut self, x: f64, y: f64, button: u32) {
+    fn mouse_up(&mut self, _x: f64, _y: f64, button: u32) {
         if button != 1 || !self.active {
             return;
         }
@@ -132,7 +131,7 @@ impl Tool for HealTool {
         }
     }
     
-    fn draw_preview(&self, context: &Context, canvas: &Canvas) {
+    fn draw_preview(&self, context: &Context, _canvas: &Canvas) {
         // Draw a preview of the healing brush
         if let Some(last) = self.last_point {
             context.save();

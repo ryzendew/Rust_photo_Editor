@@ -15,7 +15,7 @@ use std::io::Read;
 use log::{debug, info, warn, error};
 
 use crate::core::document::{Document, DocumentFormat};
-use crate::core::layer::{Layer, LayerType};
+use crate::core::layer::Layer;
 use crate::tools::{ToolType, ToolManager};
 use crate::ui::canvas::Canvas;
 use crate::ui::layers_panel::LayersPanel;
@@ -260,7 +260,7 @@ impl MainWindow {
                     if let Some(path) = file.path() {
                         info!("Saving to: {:?}", path);
                         // Here you would save the document to the path
-                        let doc = doc_clone.borrow();
+                        let _doc = doc_clone.borrow();
                         // For now, just log the action
                         info!("Document would be saved to {:?}", path);
                     }

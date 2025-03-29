@@ -155,6 +155,137 @@ impl VectorPath {
         
         cr.restore().expect("Failed to restore Cairo context");
     }
+
+    pub fn add_point(&mut self, x: f64, y: f64, node_type: PathNodeType) -> &mut Self {
+        match node_type {
+            PathNodeType::Point => self.move_to(x, y),
+            PathNodeType::Line => self.line_to(x, y),
+            PathNodeType::Curve => self.curve_to(x - 10.0, y - 10.0, x + 10.0, y + 10.0, x, y),
+            PathNodeType::Smooth => self.curve_to(x - 10.0, y, x + 10.0, y, x, y),
+            PathNodeType::Symmetric => self.curve_to(x - 10.0, y - 10.0, x + 10.0, y + 10.0, x, y),
+            PathNodeType::Asymmetric => self.curve_to(x - 5.0, y - 15.0, x + 15.0, y + 5.0, x, y),
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.segments.is_empty()
+    }
+
+    pub fn set_closed(&mut self, closed: bool) -> &mut Self {
+        if closed && !self.is_closed {
+            self.close();
+        }
+        self.is_closed = closed;
+        self
+    }
+
+    pub fn build_path(&self, context: &Context) {
+        context.new_path();
+        for segment in &self.segments {
+            match segment {
+                PathSegment::MoveTo(x, y) => context.move_to(*x, *y),
+                PathSegment::LineTo(x, y) => context.line_to(*x, *y),
+                PathSegment::CurveTo(x1, y1, x2, y2, x3, y3) => context.curve_to(*x1, *y1, *x2, *y2, *x3, *y3),
+                PathSegment::QuadraticTo(x1, y1, x2, y2) => {
+                    if let Ok((last_x, last_y)) = context.current_point() {
+                        let cx1 = last_x + 2.0/3.0 * (*x1 - last_x);
+                        let cy1 = last_y + 2.0/3.0 * (*y1 - last_y);
+                        let cx2 = *x2 + 2.0/3.0 * (*x1 - *x2);
+                        let cy2 = *y2 + 2.0/3.0 * (*y1 - *y2);
+                        context.curve_to(cx1, cy1, cx2, cy2, *x2, *y2);
+                    }
+                },
+                PathSegment::ArcTo(rx, ry, angle, large_arc, sweep, x, y) => {
+                    if let Ok((x0, y0)) = context.current_point() {
+                        let points = arc_to_bezier(x0, y0, *rx, *ry, *angle, *large_arc, *sweep, *x, *y);
+                        for i in (0..points.len()).step_by(6) {
+                            if i + 5 < points.len() {
+                                context.curve_to(
+                                    points[i], points[i+1],
+                                    points[i+2], points[i+3],
+                                    points[i+4], points[i+5]
+                                );
+                            }
+                        }
+                    }
+                },
+                PathSegment::Close => context.close_path(),
+            }
+        }
+    }
+
+    pub fn draw_nodes(&self, context: &Context) {
+        context.save().expect("Failed to save context");
+        context.set_source_rgba(0.0, 0.0, 1.0, 0.8);
+        context.set_line_width(1.0);
+
+        let mut last_point = None;
+        for segment in &self.segments {
+            match segment {
+                PathSegment::MoveTo(x, y) => {
+                    draw_node_point(context, *x, *y, PathNodeType::Point);
+                    last_point = Some((*x, *y));
+                },
+                PathSegment::LineTo(x, y) => {
+                    draw_node_point(context, *x, *y, PathNodeType::Line);
+                    last_point = Some((*x, *y));
+                },
+                PathSegment::CurveTo(x1, y1, x2, y2, x3, y3) => {
+                    if let Some((last_x, last_y)) = last_point {
+                        // Draw control points
+                        context.set_source_rgba(0.8, 0.0, 0.0, 0.5);
+                        context.move_to(last_x, last_y);
+                        context.line_to(*x1, *y1);
+                        context.move_to(*x3, *y3);
+                        context.line_to(*x2, *y2);
+                        context.stroke().expect("Failed to stroke control lines");
+                        
+                        // Draw control point handles
+                        draw_node_point(context, *x1, *y1, PathNodeType::Smooth);
+                        draw_node_point(context, *x2, *y2, PathNodeType::Smooth);
+                    }
+                    draw_node_point(context, *x3, *y3, PathNodeType::Curve);
+                    last_point = Some((*x3, *y3));
+                },
+                _ => {}
+            }
+        }
+        context.restore().expect("Failed to restore context");
+    }
+}
+
+fn draw_node_point(context: &Context, x: f64, y: f64, node_type: PathNodeType) {
+    match node_type {
+        PathNodeType::Point => {
+            // Square for corner points
+            context.rectangle(x - 3.0, y - 3.0, 6.0, 6.0);
+        },
+        PathNodeType::Smooth => {
+            // Circle for smooth points
+            context.arc(x, y, 3.0, 0.0, 2.0 * PI);
+        },
+        PathNodeType::Symmetric => {
+            // Circle for symmetric points
+            context.arc(x, y, 3.0, 0.0, 2.0 * PI);
+        },
+        PathNodeType::Asymmetric => {
+            // Diamond for asymmetric points
+            context.move_to(x, y - 3.0);
+            context.line_to(x + 3.0, y);
+            context.line_to(x, y + 3.0);
+            context.line_to(x - 3.0, y);
+            context.close_path();
+        },
+        PathNodeType::Line => {
+            // Square for line points
+            context.rectangle(x - 3.0, y - 3.0, 6.0, 6.0);
+        },
+        PathNodeType::Curve => {
+            // Circle for curve points
+            context.arc(x, y, 3.0, 0.0, 2.0 * PI);
+        }
+    }
+    context.fill().expect("Failed to fill node point");
 }
 
 /// A vectorized shape
@@ -187,6 +318,14 @@ pub enum VectorShape {
     },
     Group {
         shapes: Vec<VectorShape>,
+    },
+    Text {
+        text: String,
+        x: f64,
+        y: f64,
+        font_family: String,
+        font_size: f64,
+        font_weight: String,
     },
 }
 
@@ -288,6 +427,13 @@ impl VectorShape {
                         };
                     }
                 }
+            },
+            Self::Text { text, x, y, font_family, font_size, font_weight } => {
+                // Implementation for text shape
+                // This is a placeholder and should be implemented
+                path.move_to(*x, *y);
+                path.line_to(*x, *y);
+                path.close();
             },
         }
         
@@ -576,13 +722,18 @@ fn arc_to_bezier(x1: f64, y1: f64, rx: f64, ry: f64, angle: f64, large_arc: bool
     let mut result = Vec::new();
     
     let mut current_angle = start_angle;
-    let mut t = Matrix::new(
+    let t = Matrix::new(
         cos_angle, sin_angle,
         -sin_angle, cos_angle,
         cx, cy
     );
     
-    for i in 0..segments {
+    let mut _x1 = 0.0;
+    let mut _y1 = 0.0;
+    let mut _x2 = 0.0;
+    let mut _y2 = 0.0;
+    
+    for _i in 0..segments {
         let angle = current_angle + delta_per_segment;
         
         let p1x = cx + rx_scaled * current_angle.cos();

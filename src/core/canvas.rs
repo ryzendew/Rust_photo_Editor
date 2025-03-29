@@ -6,7 +6,8 @@ use std::rc::Rc;
 use crate::vector::{Point, VectorPath, VectorDocument, VectorShape};
 use image::{DynamicImage, ImageBuffer, Rgba};
 use std::collections::HashMap;
-use crate::core::layer::{Layer, LayerManager, Selection};
+use crate::core::layer::{Layer, LayerManager};
+use crate::core::selection::Selection;
 
 /// Available tools for image editing
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -78,83 +79,6 @@ pub struct Canvas {
     pub has_vector_mode: bool,
 }
 
-/// Represents a selection in the image
-#[derive(Clone)]
-pub struct Selection {
-    /// X coordinate of the selection
-    pub x: i32,
-    /// Y coordinate of the selection
-    pub y: i32,
-    /// Width of the selection
-    pub width: i32,
-    /// Height of the selection
-    pub height: i32,
-    /// Mask bitmap for the selection
-    pub mask: Option<image::GrayImage>,
-}
-
-impl Selection {
-    pub fn new(x: i32, y: i32, width: i32, height: i32) -> Self {
-        Self {
-            x,
-            y,
-            width,
-            height,
-            mask: None,
-        }
-    }
-    
-    pub fn with_mask(x: i32, y: i32, width: i32, height: i32, mask: image::GrayImage) -> Self {
-        Self {
-            x,
-            y,
-            width,
-            height,
-            mask: Some(mask),
-        }
-    }
-    
-    /// Get the bounds of the selection as a rectangle
-    pub fn get_bounds(&self) -> Option<cairo::Rectangle> {
-        if self.width <= 0 || self.height <= 0 {
-            return None;
-        }
-        
-        // Create a cairo::Rectangle using the tuple struct syntax
-        Some(cairo::Rectangle::new(
-            self.x as f64,
-            self.y as f64,
-            self.width as f64,
-            self.height as f64
-        ))
-    }
-    
-    pub fn contains_point(&self, x: i32, y: i32) -> bool {
-        if x < self.x || y < self.y || x >= self.x + self.width || y >= self.y + self.height {
-            return false;
-        }
-        
-        if let Some(mask) = &self.mask {
-            // Check the mask for partial selections
-            let local_x = (x - self.x) as u32;
-            let local_y = (y - self.y) as u32;
-            
-            if local_x < mask.width() && local_y < mask.height() {
-                let pixel = mask.get_pixel(local_x, local_y);
-                return pixel[0] > 0;
-            }
-        }
-        
-        true
-    }
-    
-    /// Check if the selection contains a point with u32 coordinates
-    pub fn contains(&self, x: u32, y: u32) -> bool {
-        // Convert u32 to i32 for our internal representation
-        self.contains_point(x as i32, y as i32)
-    }
-}
-
 impl Canvas {
     /// Create a new canvas with the given dimensions
     pub fn new(width: u32, height: u32) -> Self {
@@ -212,7 +136,7 @@ impl Canvas {
         self.layer_manager.resize_all_layers(width, height);
         
         // Update vector document
-        if let Some(vector_doc) = &mut self.vector_document {
+        if let Some(_vector_doc) = &mut self.vector_document {
             // For now, we just create a new document with the new size
             // In a real implementation, you'd want to keep the existing vector elements
             self.vector_document = Some(VectorDocument::new(
@@ -230,7 +154,7 @@ impl Canvas {
         self.selection = None; // Clear selection after crop
         
         // Update vector document
-        if let Some(vector_doc) = &mut self.vector_document {
+        if let Some(_vector_doc) = &mut self.vector_document {
             // For now, we just create a new document with the new size
             // In a real implementation, you'd want to adjust the existing vector elements
             self.vector_document = Some(VectorDocument::new(
@@ -243,8 +167,8 @@ impl Canvas {
     /// Crop to the current selection
     pub fn crop_to_selection(&mut self) -> bool {
         if let Some(selection) = &self.selection {
-            let x = selection.x.max(0) as u32;
-            let y = selection.y.max(0) as u32;
+            let x = selection.x.max(0.0) as u32;
+            let y = selection.y.max(0.0) as u32;
             let width = selection.width as u32;
             let height = selection.height as u32;
             
@@ -267,7 +191,7 @@ impl Canvas {
     /// Check if a point is within the selection
     pub fn is_selected(&self, x: u32, y: u32) -> bool {
         if let Some(selection) = &self.selection {
-            selection.contains(x, y)
+            selection.contains(x as f64, y as f64)
         } else {
             true // If no selection, entire canvas is considered selected
         }

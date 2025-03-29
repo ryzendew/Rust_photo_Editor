@@ -175,7 +175,7 @@ impl Tool for CropTool {
         }
     }
     
-    fn mouse_up(&mut self, x: f64, y: f64, button: u32) {
+    fn mouse_up(&mut self, _x: f64, _y: f64, button: u32) {
         // This would typically call on_mouse_up with a canvas
         if button == 1 {
             self.dragging = false;

@@ -470,17 +470,13 @@ impl ImageFilter {
         DynamicImage::ImageRgba8(blurred)
     }
 
-    pub fn apply_sharpen(&self, image: &DynamicImage) -> DynamicImage {
-        let amount = self.settings.strength;
+    pub fn apply_sharpen(&self, img: &DynamicImage) -> DynamicImage {
         let kernel = [
-            [0.0, -amount, 0.0],
-            [-amount, 1.0 + 4.0 * amount, -amount],
-            [0.0, -amount, 0.0],
+            -1.0, -1.0, -1.0,
+            -1.0,  9.0, -1.0,
+            -1.0, -1.0, -1.0
         ];
-
-        let img = image.to_rgba8();
-        let sharpened = imageproc::filter::filter(&img, &kernel);
-        DynamicImage::ImageRgba8(sharpened)
+        image::DynamicImage::ImageRgb8(imageproc::filter::filter3x3(&img.to_rgb8(), &kernel))
     }
 
     pub fn apply_noise_reduction(&self, image: &DynamicImage) -> DynamicImage {

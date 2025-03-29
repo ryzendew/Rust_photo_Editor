@@ -4,7 +4,7 @@ use uuid::Uuid;
 use std::collections::HashMap;
 
 /// Represents a layer in the image
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Layer {
     pub id: String,
     pub name: String,
@@ -167,7 +167,7 @@ impl Layer {
     }
     
     /// Render the layer to a Cairo context
-    pub fn render(&self, context: &Context) {
+    pub fn render(&self, context: &Context, _width: u32, _height: u32) {
         if !self.visible || self.opacity <= 0.0 {
             return;
         }
@@ -238,7 +238,7 @@ impl Layer {
 }
 
 /// Manages multiple layers in an image
-#[derive(Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct LayerManager {
     layers: Vec<Layer>,
     active_layer_index: usize,
@@ -418,11 +418,15 @@ impl LayerManager {
     }
     
     /// Render all layers to a Cairo context
-    pub fn render(&self, context: &Context, width: u32, height: u32) {
+    pub fn render(&self, context: &Context, _width: u32, _height: u32) {
         // Draw the layers bottom to top
         for layer in &self.layers {
-            layer.render(context);
+            layer.render(context, _width, _height);
         }
+    }
+
+    pub fn get_layers(&self) -> &[Layer] {
+        &self.layers
     }
 }
 
@@ -455,7 +459,7 @@ fn blend_pixels(dst: &Rgba<u8>, src: &Rgba<u8>, blend_mode: BlendMode, opacity: 
     let dst_a = dst[3] as f32 / 255.0;
     
     // Calculate result color based on blend mode
-    let (result_r, result_g, result_b) = match blend_mode {
+    let (_result_r, _result_g, _result_b) = match blend_mode {
         BlendMode::Normal => (src_r, src_g, src_b),
         BlendMode::Multiply => (src_r * dst_r, src_g * dst_g, src_b * dst_b),
         BlendMode::Screen => (

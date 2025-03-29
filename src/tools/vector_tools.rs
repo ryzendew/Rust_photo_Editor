@@ -4,9 +4,10 @@ use crate::vector::{
     Point, Rect, Transform, SelectionState,
     VectorShape, ShapeType, FillStyle, StrokeStyle, Color, LineDash,
     TextShape, TextStyle, TextAlignment, FontWeight, FontStyle,
-    Path, PathNode, PathNodeType, BezierPoint,
-    VectorDocument, VectorLayer
+    PathNode, PathNodeType, BezierPoint,
+    VectorDocument, VectorPath
 };
+use crate::vector::path::Path;
 use crate::vector::shape::VectorShape as ShapeImpl;
 use crate::core::Canvas;
 
@@ -365,7 +366,7 @@ impl TextTool {
 /// Tool for creating paths
 #[derive(Clone)]
 pub struct PathTool {
-    pub path: Path,
+    pub path: VectorPath,
     pub current_point: Option<Point>,
     pub is_drawing: bool,
     pub node_type: PathNodeType,
@@ -377,12 +378,12 @@ pub struct PathTool {
 impl Default for PathTool {
     fn default() -> Self {
         Self {
-            path: Path::new(),
+            path: VectorPath::new(),
             current_point: None,
             is_drawing: false,
             node_type: PathNodeType::Point,
-            fill_color: Color::new(1.0, 1.0, 1.0, 0.5),
-            stroke_color: Color::black(),
+            fill_color: Color::new(0.0, 0.0, 0.0, 1.0),
+            stroke_color: Color::new(0.0, 0.0, 0.0, 1.0),
             stroke_width: 1.0,
         }
     }
@@ -396,7 +397,7 @@ impl PathTool {
     pub fn start(&mut self, x: f64, y: f64) {
         if !self.is_drawing {
             // Start a new path
-            self.path = Path::new();
+            self.path = VectorPath::new();
             self.is_drawing = true;
         }
         
@@ -439,7 +440,7 @@ impl PathTool {
     }
     
     pub fn reset(&mut self) {
-        self.path = Path::new();
+        self.path = VectorPath::new();
         self.current_point = None;
         self.is_drawing = false;
     }

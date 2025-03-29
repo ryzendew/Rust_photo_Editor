@@ -1,4 +1,4 @@
-use image::{ImageBuffer, Rgba};
+use image::{DynamicImage, Rgba, GenericImageView, ImageBuffer, Luma};
 use imageproc::filter::{gaussian_blur_f32, box_filter};
 use std::f32::consts::PI;
 use crate::filters::Filter;
@@ -200,14 +200,14 @@ impl Filter for MotionBlur {
                         let p10 = image.get_pixel(x1, y0);
                         let p11 = image.get_pixel(x1, y1);
                         
-                        let r = (p00[0] as f32 * w00 + p01[0] as f32 * w01 + 
-                                 p10[0] as f32 * w10 + p11[0] as f32 * w11);
-                        let g = (p00[1] as f32 * w00 + p01[1] as f32 * w01 + 
-                                 p10[1] as f32 * w10 + p11[1] as f32 * w11);
-                        let b = (p00[2] as f32 * w00 + p01[2] as f32 * w01 + 
-                                 p10[2] as f32 * w10 + p11[2] as f32 * w11);
-                        let a = (p00[3] as f32 * w00 + p01[3] as f32 * w01 + 
-                                 p10[3] as f32 * w10 + p11[3] as f32 * w11);
+                        let r = p00[0] as f32 * w00 + p01[0] as f32 * w01 + 
+                               p10[0] as f32 * w10 + p11[0] as f32 * w11;
+                        let g = p00[1] as f32 * w00 + p01[1] as f32 * w01 + 
+                               p10[1] as f32 * w10 + p11[1] as f32 * w11;
+                        let b = p00[2] as f32 * w00 + p01[2] as f32 * w01 + 
+                               p10[2] as f32 * w10 + p11[2] as f32 * w11;
+                        let a = p00[3] as f32 * w00 + p01[3] as f32 * w01 + 
+                               p10[3] as f32 * w10 + p11[3] as f32 * w11;
                         
                         let weight = 1.0;
                         
@@ -350,14 +350,14 @@ impl Filter for RadialBlur {
                         let p10 = image.get_pixel(x1, y0);
                         let p11 = image.get_pixel(x1, y1);
                         
-                        let r = (p00[0] as f32 * w00 + p01[0] as f32 * w01 + 
-                                 p10[0] as f32 * w10 + p11[0] as f32 * w11);
-                        let g = (p00[1] as f32 * w00 + p01[1] as f32 * w01 + 
-                                 p10[1] as f32 * w10 + p11[1] as f32 * w11);
-                        let b = (p00[2] as f32 * w00 + p01[2] as f32 * w01 + 
-                                 p10[2] as f32 * w10 + p11[2] as f32 * w11);
-                        let a = (p00[3] as f32 * w00 + p01[3] as f32 * w01 + 
-                                 p10[3] as f32 * w10 + p11[3] as f32 * w11);
+                        let r = p00[0] as f32 * w00 + p01[0] as f32 * w01 + 
+                               p10[0] as f32 * w10 + p11[0] as f32 * w11;
+                        let g = p00[1] as f32 * w00 + p01[1] as f32 * w01 + 
+                               p10[1] as f32 * w10 + p11[1] as f32 * w11;
+                        let b = p00[2] as f32 * w00 + p01[2] as f32 * w01 + 
+                               p10[2] as f32 * w10 + p11[2] as f32 * w11;
+                        let a = p00[3] as f32 * w00 + p01[3] as f32 * w01 + 
+                               p10[3] as f32 * w10 + p11[3] as f32 * w11;
                         
                         // Weight decreases with distance from original point
                         let weight = 1.0 - (i as f32 / num_samples as f32) * 0.5;

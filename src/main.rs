@@ -3,6 +3,11 @@ use rust_photo::{core::init_logging, ui::MainWindow, APP_ID};
 use gtk4::prelude::*;
 use std::env;
 use log::{info, warn, debug, error};
+use std::path::PathBuf;
+use gtk4::{Application, ApplicationWindow};
+use libadwaita::prelude::*;
+use crate::core::{Document, Layer};
+use crate::filters::{Filter, GaussianBlur};
 
 mod core;
 mod filters;
@@ -10,75 +15,51 @@ mod tools;
 mod ui;
 mod vector;
 
+#[cfg(feature = "gpu-cuda")]
 fn init_gpu() {
-    // Check for CUDA
-    if cfg!(feature = "gpu-cuda") {
-        match cuda_runtime_sys::init() {
-            Ok(_) => info!("CUDA initialization successful"),
-            Err(e) => warn!("Failed to initialize CUDA: {}", e),
-        }
-    }
+    info!("Initializing CUDA GPU support");
+    // CUDA initialization is handled by the runtime automatically
+    // We don't need to explicitly initialize it
+}
 
-    // Check for ROCm
-    if cfg!(feature = "gpu-rocm") {
-        match rocm_runtime_sys::init() {
-            Ok(_) => info!("ROCm initialization successful"),
-            Err(e) => warn!("Failed to initialize ROCm: {}", e),
-        }
-    }
-
-    // Initialize OpenCL as fallback
-    match ocl::Platform::list() {
-        Ok(platforms) => {
-            if !platforms.is_empty() {
-                info!("OpenCL platforms available: {}", platforms.len());
-            } else {
-                warn!("No OpenCL platforms found");
-            }
-        }
-        Err(e) => warn!("Failed to query OpenCL platforms: {}", e),
-    }
+#[cfg(not(feature = "gpu-cuda"))]
+fn init_gpu() {
+    info!("No GPU acceleration enabled");
 }
 
 fn main() {
-    // Initialize logging first thing
-    init_logging();
-    
+    // Initialize logging
+    env_logger::init();
     info!("Starting Rust Photo v0.1");
     
-    // Initialize GPU support
-    if let Err(e) = rust_photo::init_gpu() {
-        error!("Failed to initialize GPU support: {}", e);
-    }
+    // Initialize GPU if available
+    init_gpu();
     
     // Create GTK application
-    let app = gtk4::Application::builder()
-        .application_id(APP_ID)
+    let app = Application::builder()
+        .application_id("com.example.rust_photo")
         .build();
-
-    // Connect to activate signal
+    
     app.connect_activate(|app| {
-        // Create and show the main window
-        let window = MainWindow::new(app);
-        window.window.show();
+        let main_window = MainWindow::new(app);
+        main_window.window.show();
     });
-
+    
     // Run the application
-    let args: Vec<String> = std::env::args().collect();
-    app.run_with_args(&args);
+    app.run();
     
     info!("Shutting down Rust Photo");
 }
 
 /// Initialize a new document for testing
 fn create_test_document(app_state: &mut core::AppState) -> core::Document {
-    debug!("Creating test document");
+    info!("Creating test document");
     
     let width = 1920;
     let height = 1080;
     
     info!("Creating new document: {}x{}", width, height);
-    let document = app_state.new_document(
+    let mut document = app_state.new_document(
         width, 
         height, 
         core::ColorSpace::SRGB, 
@@ -86,24 +67,22 @@ fn create_test_document(app_state: &mut core::AppState) -> core::Document {
     );
     
     // Create a few layers for testing
-    debug!("Adding test layers");
+    info!("Adding test layers");
     
     // Background layer was already created by new_document
     
     // Add a second layer
     let mut layer2 = core::Layer::new(width, height, "Layer 2".to_string());
     layer2.opacity = 0.8;
-    let layer2_idx = document.add_layer(layer2);
-    debug!("Added Layer 2 at index {}", layer2_idx);
+    document.add_layer(layer2);
     
     // Add a third layer
     let mut layer3 = core::Layer::new(width, height, "Text Layer".to_string());
     layer3.opacity = 1.0;
-    let layer3_idx = document.add_layer(layer3);
-    debug!("Added Layer 3 at index {}", layer3_idx);
+    document.add_layer(layer3);
     
     // Apply a test filter to one of the layers
-    debug!("Applying test filter");
+    info!("Applying test filter");
     let gaussian_blur = filters::GaussianBlur::new(5.0);
     if let Some(layer) = document.layer_manager.get_layer_mut(1) {
         let width = layer.image.width();

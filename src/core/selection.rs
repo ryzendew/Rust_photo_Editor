@@ -11,6 +11,24 @@ pub struct Rect {
     pub height: f64,
 }
 
+impl Rect {
+    pub fn x(&self) -> f64 {
+        self.x
+    }
+
+    pub fn y(&self) -> f64 {
+        self.y
+    }
+
+    pub fn width(&self) -> f64 {
+        self.width
+    }
+
+    pub fn height(&self) -> f64 {
+        self.height
+    }
+}
+
 /// Selection type - determines how selection operations work
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum SelectionType {
@@ -695,5 +713,10 @@ impl Selection {
                 height: self.height as f64,
             })
         }
+    }
+
+    pub fn contains(&self, x: f64, y: f64) -> bool {
+        x >= self.x && x <= self.x + self.width as f64 &&
+        y >= self.y && y <= self.y + self.height as f64
     }
 } 

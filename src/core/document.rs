@@ -3,7 +3,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use std::fmt;
 use uuid::Uuid;
 use image::{DynamicImage, GenericImageView, ImageBuffer, Rgba};
-use crate::core::layers::{Layer, LayerManager};
+use crate::core::layer::{Layer, LayerManager};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq)]

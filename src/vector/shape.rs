@@ -1,10 +1,10 @@
-use super::{VectorPath, VectorText, Fill};
-use cairo::Context;
-use std::f64::consts::PI;
-use cairo::{LineCap, LineJoin, Pattern};
+use super::{PathNodeType};
+use cairo::{Context, LineCap, LineJoin};
 use uuid::Uuid;
 use crate::vector::{Point, Rect, Transform, VectorObject, SelectionState, PathOperation};
 use crate::vector::path::Path;
+use std::f64::consts::PI;
+use crate::vector::text::{TextShape, TextStyle, FontWeight};
 
 /// Represents a vector shape in the document.
 /// Shapes can be rectangles, ellipses, paths, or text.
@@ -95,6 +95,71 @@ pub enum FillStyle {
 impl Default for FillStyle {
     fn default() -> Self {
         FillStyle::Solid(Color::black())
+    }
+}
+
+impl FillStyle {
+    pub fn apply(&self, context: &Context) {
+        match self {
+            FillStyle::Solid(color) => {
+                context.set_source_rgba(
+                    color.r,
+                    color.g,
+                    color.b,
+                    color.a
+                );
+            }
+            FillStyle::Gradient(gradient) => {
+                match &gradient.gradient_type {
+                    GradientType::Linear { start, end } => {
+                        let linear = cairo::LinearGradient::new(start.x, start.y, end.x, end.y);
+                        for &(offset, color) in &gradient.stops {
+                            linear.add_color_stop_rgba(
+                                offset,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a
+                            );
+                        }
+                        context.set_source(&linear).expect("Failed to set gradient source");
+                    }
+                    GradientType::Radial { center, radius } => {
+                        let radial = cairo::RadialGradient::new(
+                            center.x, center.y, 0.0,
+                            center.x, center.y, *radius
+                        );
+                        for &(offset, color) in &gradient.stops {
+                            radial.add_color_stop_rgba(
+                                offset,
+                                color.r,
+                                color.g,
+                                color.b,
+                                color.a
+                            );
+                        }
+                        context.set_source(&radial).expect("Failed to set gradient source");
+                    }
+                    GradientType::Conical { center: _, angle } => {
+                        let default_color = Color::new(0.0, 0.0, 0.0, 1.0);
+                        let color = gradient.stops.first().map(|(_, c)| c.clone()).unwrap_or(default_color);
+                        context.set_source_rgba(
+                            color.r,
+                            color.g,
+                            color.b,
+                            color.a
+                        );
+                    }
+                }
+            }
+            FillStyle::Pattern(_) => {
+                // TODO: Implement pattern fill
+                context.set_source_rgba(0.0, 0.0, 0.0, 1.0);
+            }
+            FillStyle::None => {
+                context.set_source_rgba(0.0, 0.0, 0.0, 0.0);
+            }
+        }
     }
 }
 
@@ -211,10 +276,29 @@ impl VectorShape {
         font_size: f64,
         font_weight: &str
     ) -> Self {
-        let text_obj = VectorText::new(text, font_family, font_size, font_weight, x, y);
         let mut shape = Self::default();
         shape.position = Point::new(x, y);
-        shape.shape_type = ShapeType::Custom { path: text_obj.path };
+        shape.shape_type = ShapeType::Custom { 
+            path: Path::new() // We'll create a path for the text outline
+        };
+        
+        // Create a text shape to get its path
+        let text_shape = TextShape::new(
+            text.to_string(),
+            Point::new(x, y),
+            TextStyle {
+                font_family: font_family.to_string(),
+                font_size,
+                font_weight: if font_weight == "bold" { FontWeight::Bold } else { FontWeight::Normal },
+                ..Default::default()
+            }
+        );
+        
+        // Update the path in the shape
+        if let ShapeType::Custom { path } = &mut shape.shape_type {
+            *path = text_shape.path;
+        }
+        
         shape
     }
     
@@ -385,81 +469,7 @@ impl VectorShape {
     }
     
     fn apply_fill(&self, context: &Context) {
-        match &self.fill {
-            FillStyle::None => {
-                // No fill
-                return;
-            },
-            FillStyle::Solid(color) => {
-                context.set_source_rgba(
-                    color.r,
-                    color.g,
-                    color.b,
-                    color.a
-                );
-            },
-            FillStyle::Gradient(gradient) => {
-                // Set up gradient pattern
-                match &gradient.gradient_type {
-                    GradientType::Linear { start, end } => {
-                        let linear = cairo::LinearGradient::new(
-                            start.x, start.y,
-                            end.x, end.y
-                        );
-                        
-                        for &(offset, ref color) in &gradient.stops {
-                            linear.add_color_stop_rgba(
-                                offset,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a
-                            );
-                        }
-                        
-                        context.set_source(&linear);
-                    },
-                    GradientType::Radial { center, radius } => {
-                        let radial = cairo::RadialGradient::new(
-                            center.x, center.y, 0.0,
-                            center.x, center.y, 
-                            *radius
-                        );
-                        
-                        for &(offset, ref color) in &gradient.stops {
-                            radial.add_color_stop_rgba(
-                                offset,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a
-                            );
-                        }
-                        
-                        context.set_source(&radial);
-                    },
-                    GradientType::Conical { center, angle: _ } => {
-                        // Create a stable, owned Color value before using it
-                        let default_color = Color::new(0.0, 0.0, 0.0, 1.0);
-                        let color = gradient.stops.first().map(|(_, c)| c.clone()).unwrap_or(default_color);
-                        context.set_source_rgba(
-                            color.r,
-                            color.g,
-                            color.b,
-                            color.a
-                        );
-                    }
-                };
-            },
-            FillStyle::Pattern(_path) => {
-                // For pattern fills, we would load an image or pattern
-                // Just use a default fill for now
-                context.set_source_rgba(0.8, 0.8, 0.8, 1.0);
-            }
-        }
-        
-        // Fill the path
-        context.fill_preserve();
+        self.fill.apply(context);
     }
     
     fn apply_stroke(&self, context: &Context) {
@@ -687,78 +697,7 @@ impl VectorObject for VectorShape {
         self.build_path(context);
         
         // Set fill and stroke styles
-        match &self.fill {
-            FillStyle::Solid(color) => {
-                context.set_source_rgba(
-                    color.r,
-                    color.g,
-                    color.b,
-                    color.a
-                );
-            },
-            FillStyle::Gradient(gradient) => {
-                // Set up gradient pattern
-                match &gradient.gradient_type {
-                    GradientType::Linear { start, end } => {
-                        let linear = cairo::LinearGradient::new(
-                            start.x, start.y,
-                            end.x, end.y
-                        );
-                        
-                        for &(offset, ref color) in &gradient.stops {
-                            linear.add_color_stop_rgba(
-                                offset,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a
-                            );
-                        }
-                        
-                        context.set_source(&linear);
-                    },
-                    GradientType::Radial { center, radius } => {
-                        let radial = cairo::RadialGradient::new(
-                            center.x, center.y, 0.0,
-                            center.x, center.y, 
-                            *radius
-                        );
-                        
-                        for &(offset, ref color) in &gradient.stops {
-                            radial.add_color_stop_rgba(
-                                offset,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a
-                            );
-                        }
-                        
-                        context.set_source(&radial);
-                    },
-                    GradientType::Conical { center: _, angle } => {
-                        // Not directly supported in Cairo, fallback to a solid color
-                        let default_color = Color::new(0.0, 0.0, 0.0, 1.0);
-                        let color = gradient.stops.first().map(|(_, c)| c.clone()).unwrap_or(default_color);
-                        context.set_source_rgba(
-                            color.r,
-                            color.g,
-                            color.b,
-                            color.a
-                        );
-                        return;
-                    }
-                };
-            },
-            FillStyle::Pattern(_) => {
-                // Pattern fills not implemented yet
-                context.set_source_rgba(0.0, 0.0, 0.0, 0.0);
-            },
-            FillStyle::None => {
-                // No fill
-                context.set_source_rgba(0.0, 0.0, 0.0, 0.0);
-            }
-        }
+        self.apply_fill(context);
         
         // Create path based on shape type
         match &self.shape_type {
@@ -856,77 +795,7 @@ impl VectorObject for VectorShape {
         }
         
         // Fill the shape if there's a fill style
-        match &self.fill {
-            FillStyle::Solid(color) => {
-                context.set_source_rgba(
-                    color.r,
-                    color.g,
-                    color.b,
-                    color.a
-                );
-            },
-            FillStyle::Gradient(gradient) => {
-                match &gradient.gradient_type {
-                    GradientType::Linear { start, end } => {
-                        let linear = cairo::LinearGradient::new(
-                            start.x, start.y,
-                            end.x, end.y
-                        );
-                        
-                        for (offset, ref color) in &gradient.stops {
-                            linear.add_color_stop_rgba(
-                                *offset,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a
-                            );
-                        }
-                        
-                        context.set_source(&linear);
-                    },
-                    GradientType::Radial { center, radius } => {
-                        let radial = cairo::RadialGradient::new(
-                            center.x, center.y, 0.0,
-                            center.x, center.y, 
-                            *radius
-                        );
-                        
-                        for (offset, ref color) in &gradient.stops {
-                            radial.add_color_stop_rgba(
-                                *offset,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a
-                            );
-                        }
-                        
-                        context.set_source(&radial);
-                    },
-                    GradientType::Conical { center: _, angle } => {
-                        // Not directly supported in Cairo, fallback to a solid color
-                        let default_color = Color::new(0.0, 0.0, 0.0, 1.0);
-                        let color = gradient.stops.first().map(|(_, c)| c.clone()).unwrap_or(default_color);
-                        context.set_source_rgba(
-                            color.r,
-                            color.g,
-                            color.b,
-                            color.a
-                        );
-                        return;
-                    }
-                };
-            },
-            FillStyle::Pattern(_) => {
-                // Pattern fills not implemented yet
-                context.set_source_rgba(0.5, 0.5, 0.5, 1.0);
-            },
-            FillStyle::None => {
-                // No fill
-                context.set_source_rgba(0.0, 0.0, 0.0, 0.0);
-            }
-        }
+        self.apply_fill(context);
         
         context.fill_preserve().expect("Failed to fill shape");
         
@@ -1030,6 +899,30 @@ impl VectorObject for Path {
         for i in 1..self.nodes.len() {
             let node = &self.nodes[i];
             match node.node_type {
+                PathNodeType::Point => {
+                    context.move_to(node.point.position.x, node.point.position.y);
+                },
+                PathNodeType::Smooth => {
+                    context.curve_to(
+                        node.point.control_in.x, node.point.control_in.y,
+                        node.point.control_out.x, node.point.control_out.y,
+                        node.point.position.x, node.point.position.y
+                    );
+                },
+                PathNodeType::Symmetric => {
+                    context.curve_to(
+                        node.point.control_in.x, node.point.control_in.y,
+                        node.point.control_out.x, node.point.control_out.y,
+                        node.point.position.x, node.point.position.y
+                    );
+                },
+                PathNodeType::Asymmetric => {
+                    context.curve_to(
+                        node.point.control_in.x, node.point.control_in.y,
+                        node.point.control_out.x, node.point.control_out.y,
+                        node.point.position.x, node.point.position.y
+                    );
+                },
                 PathNodeType::Line => {
                     context.line_to(node.point.position.x, node.point.position.y);
                 },
@@ -1116,72 +1009,5 @@ impl VectorObject for Path {
     
     fn clone_box(&self) -> Box<dyn VectorObject> {
         Box::new(self.clone())
-    }
-}
-
-// Fix gradient stops
-impl Fill {
-    pub fn apply(&self, context: &Context) {
-        match self {
-            Fill::Solid(color) => {
-                context.set_source_rgba(
-                    color.r,
-                    color.g,
-                    color.b,
-                    color.a
-                );
-            }
-            Fill::Gradient(gradient) => {
-                match &gradient.gradient_type {
-                    GradientType::Linear { start, end } => {
-                        let linear = cairo::LinearGradient::new(start.x, start.y, end.x, end.y);
-                        for &(offset, color) in &gradient.stops {
-                            linear.add_color_stop_rgba(
-                                offset,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a
-                            );
-                        }
-                        context.set_source(&linear).expect("Failed to set gradient source");
-                    }
-                    GradientType::Radial { center, radius } => {
-                        let radial = cairo::RadialGradient::new(
-                            center.x, center.y, 0.0,
-                            center.x, center.y, radius
-                        );
-                        for &(offset, color) in &gradient.stops {
-                            radial.add_color_stop_rgba(
-                                offset,
-                                color.r,
-                                color.g,
-                                color.b,
-                                color.a
-                            );
-                        }
-                        context.set_source(&radial).expect("Failed to set gradient source");
-                    }
-                    GradientType::Conical { center: _, angle } => {
-                        // TODO: Implement conical gradient
-                        let default_color = Color::new(0.0, 0.0, 0.0, 1.0);
-                        let color = gradient.stops.first().map(|(_, c)| c.clone()).unwrap_or(default_color);
-                        context.set_source_rgba(
-                            color.r,
-                            color.g,
-                            color.b,
-                            color.a
-                        );
-                    }
-                }
-            }
-            Fill::Pattern(_) => {
-                // TODO: Implement pattern fill
-                context.set_source_rgba(0.0, 0.0, 0.0, 1.0);
-            }
-            Fill::None => {
-                context.set_source_rgba(0.0, 0.0, 0.0, 0.0);
-            }
-        }
     }
 } 

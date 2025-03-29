@@ -10,20 +10,21 @@ mod gradient;
 mod vector_tools;
 
 pub use selection::{SelectionTool, SelectionType};
-pub use brush::{BrushTool, BrushType, BrushSettings};
-pub use clone::{CloneTool, CloneSettings};
+pub use brush::BrushTool;
+pub use clone::CloneTool;
 pub use heal::{HealTool, HealSettings};
 pub use crop::CropTool;
 pub use text::TextTool;
-pub use gradient::{GradientTool, GradientType};
+pub use gradient::GradientTool;
 pub use vector_tools::{RectangleTool, EllipseTool, PathTool, TextTool as VectorTextTool};
+pub use crate::core::canvas::BrushSettings;
 
 use cairo::Context;
 use image::{DynamicImage, ImageBuffer, Rgba};
 use crate::core::{Canvas, Layer, LayerManager, Selection, Color};
 use crate::core::Point as CorePoint;
 use crate::core::selection::Selection as CoreSelection;
-use crate::core::canvas::Selection as CanvasSelection;
+use crate::core::selection::Selection as CanvasSelection;
 use crate::vector::{Point as VectorPoint, VectorDocument, Rect};
 use std::str::FromStr;
 use std::cell::RefMut;
@@ -134,7 +135,7 @@ pub trait ToolImpl {
     }
     
     /// Optional method to draw tool-specific UI elements
-    fn draw(&self, canvas: &Canvas, context: &cairo::Context) {}
+    fn draw(&self, _canvas: &Canvas, _context: &cairo::Context) {}
 }
 
 /// A collection of all available tools
@@ -284,7 +285,7 @@ impl ToolManager {
         }
     }
     
-    pub fn mouse_move(&mut self, x: f64, y: f64, canvas: &mut Canvas) {
+    pub fn mouse_move(&mut self, x: f64, y: f64, _canvas: &mut Canvas) {
         match self.active_tool {
             ToolType::RectangleSelection |
             ToolType::EllipseSelection |
@@ -318,11 +319,13 @@ impl ToolManager {
                 // Apply selection to canvas
                 if let Some(selection) = self.selection_tool.get_selection() {
                     // Convert from CoreSelection to CanvasSelection
-                    let canvas_selection = CanvasSelection::new(
-                        selection.x as i32, 
-                        selection.y as i32,
-                        selection.width as i32,
-                        selection.height as i32
+                    let canvas_selection = CanvasSelection::rectangle(
+                        selection.x as f64,
+                        selection.y as f64,
+                        selection.width as u32,
+                        selection.height as u32,
+                        canvas.width,
+                        canvas.height
                     );
                     canvas.set_selection(canvas_selection);
                 }
@@ -456,9 +459,6 @@ impl Clone for ToolManager {
 // pub use selection::SelectionTool;
 // pub use gradient::GradientTool;
 // pub use text::TextTool;
-pub use transform::TransformTool;
-pub use paint::PaintTool;
-pub use vector::VectorTool;
 // pub use vector_tools::*; // Already imported above
 
 // Add extension method for RefMut<ToolManager>
@@ -469,5 +469,23 @@ pub trait ToolManagerExt {
 impl ToolManagerExt for RefMut<'_, ToolManager> {
     fn select_tool(&mut self, tool_type: ToolType) {
         self.set_active_tool(tool_type);
+    }
+}
+
+/// Context for tool operations
+#[derive(Clone)]
+pub struct ToolContext {
+    pub tool_type: ToolType,
+    pub cursor: String,
+    pub is_active: bool,
+}
+
+impl Default for ToolContext {
+    fn default() -> Self {
+        Self {
+            tool_type: ToolType::Brush,
+            cursor: "default".to_string(),
+            is_active: false,
+        }
     }
 } 

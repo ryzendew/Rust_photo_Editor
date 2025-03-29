@@ -179,6 +179,8 @@ pub enum PathNodeType {
     Smooth,     // Smooth bezier point (handles aligned)
     Symmetric,  // Symmetric bezier point (handles equal length)
     Asymmetric, // Asymmetric bezier point (handles independent)
+    Line,       // Line segment
+    Curve,      // Curve segment
 }
 
 /// A bezier point with a position and two control points
@@ -269,12 +271,12 @@ impl PathNode {
         
         // Adjust control points based on the new type
         match node_type {
-            PathNodeType::Point => {
+            PathNodeType::Point | PathNodeType::Line => {
                 // Set control points to the position (no curves)
                 self.point.control_in = self.point.position;
                 self.point.control_out = self.point.position;
             },
-            PathNodeType::Smooth => {
+            PathNodeType::Smooth | PathNodeType::Curve => {
                 self.point.make_smooth();
             },
             PathNodeType::Symmetric => {
@@ -510,8 +512,18 @@ impl Path {
                         6.0
                     );
                 },
-                PathNodeType::Smooth | PathNodeType::Symmetric => {
+                PathNodeType::Smooth => {
                     // Circle for smooth points
+                    context.arc(
+                        node.point.position.x,
+                        node.point.position.y,
+                        3.0,
+                        0.0,
+                        std::f64::consts::PI * 2.0
+                    );
+                },
+                PathNodeType::Symmetric => {
+                    // Circle for symmetric points
                     context.arc(
                         node.point.position.x,
                         node.point.position.y,
@@ -528,6 +540,25 @@ impl Path {
                     context.line_to(node.point.position.x - 3.0, node.point.position.y);
                     context.close_path();
                 },
+                PathNodeType::Line => {
+                    // Square for line points
+                    context.rectangle(
+                        node.point.position.x - 3.0,
+                        node.point.position.y - 3.0,
+                        6.0,
+                        6.0
+                    );
+                },
+                PathNodeType::Curve => {
+                    // Circle for curve points
+                    context.arc(
+                        node.point.position.x,
+                        node.point.position.y,
+                        3.0,
+                        0.0,
+                        std::f64::consts::PI * 2.0
+                    );
+                }
             }
             
             context.fill();

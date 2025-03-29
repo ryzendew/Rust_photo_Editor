@@ -47,11 +47,14 @@ rand = "0.8.5"
 # Enabled with feature flags
 vulkano = { version = "0.34.1", optional = true }
 wgpu = { version = "0.17.1", optional = true }
+ocl = { version = "0.19", optional = true }
+cuda-runtime-sys = { version = "0.3.0-alpha.1", optional = true }
 
 [features]
 default = []
 gpu-vulkan = ["dep:vulkano"]
 gpu-wgpu = ["dep:wgpu"]
+gpu-cuda = ["dep:ocl", "dep:cuda-runtime-sys"]
 
 [profile.release]
 opt-level = 3

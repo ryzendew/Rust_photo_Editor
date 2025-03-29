@@ -101,7 +101,7 @@ impl ToolsPanel {
         button.set_widget_name(&format!("tool-{:?}", tool_type));
         
         // Connect the toggle signal
-        let button_clone = button.clone();
+        let _button_clone = button.clone();
         button.connect_toggled(move |btn| {
             if btn.is_active() {
                 // The tool was selected
